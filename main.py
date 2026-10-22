@@ -1,7 +1,9 @@
-	mport os
+import os
 import sqlite3
 import logging
+import threading
 import requests
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 from io import BytesIO
 from PIL import Image
@@ -15,6 +17,24 @@ from telegram.ext import (
     filters,
 )
 
+# ----------------------------------------------------
+# وب‌سرور ساده برای نگه داشتن سرویس در Render
+# ----------------------------------------------------
+class DummyServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Bot is active!")
+
+def run_dummy_server():
+    port = int(os.getenv("PORT", 8080))
+    server = HTTPServer(('0.0.0.0', port), DummyServer)
+    server.serve_forever()
+
+# ----------------------------------------------------
+# تنظیمات اصلی و مدیریت
+# ----------------------------------------------------
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -252,8 +272,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("✨ درخواست شما دریافت شد و در حال پردازش توسط هوش مصنوعی است...")
 
+# ----------------------------------------------------
+# راه‌اندازی هم‌زمان پورت وب و ربات تلگرام
+# ----------------------------------------------------
 if __name__ == "__main__":
     init_db()
+    
+    # اجرای وب‌سرور در یک Thread جداگانه جهت پاس کردن تست پورت Render
+    threading.Thread(target=run_dummy_server, daemon=True).start()
     
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     
