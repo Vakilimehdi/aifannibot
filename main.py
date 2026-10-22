@@ -1,4 +1,4 @@
-import os
+	mport os
 import sqlite3
 import logging
 import requests
@@ -15,15 +15,12 @@ from telegram.ext import (
     filters,
 )
 
-# ----------------------------------------------------
-# تنظیمات اصلی، لاگین و اطلاعات مدیریت
-# ----------------------------------------------------
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 
-ADMIN_CHAT_ID = 162256307  # آیدی عددی شما (دسترسی نامحدود)
+ADMIN_CHAT_ID = 162256307
 BOT_TOKEN = os.getenv("BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN")
 
 BANK_CARD_TEXT = """
@@ -42,9 +39,6 @@ BANK_CARD_TEXT = """
 پس از واریز وجه، **تصویر رسید یا عکس فیش واریزی** را مستقیماً همین‌جا در ربات ارسال کنید تا حساب شما شارژ شود.
 """
 
-# ----------------------------------------------------
-# مدیریت دیتابیس (SQLite) با قابلیت شارژ روزانه
-# ----------------------------------------------------
 DB_NAME = "bot_database.db"
 
 def init_db():
@@ -64,7 +58,6 @@ def get_today_string():
     return datetime.now().strftime("%Y-%m-%d")
 
 def check_and_reset_daily_credits(user_id):
-    """بررسی و شارژ مجدد ۳ اعتبار در صورت شروع روز جدید"""
     if user_id == ADMIN_CHAT_ID:
         return
 
@@ -80,7 +73,6 @@ def check_and_reset_daily_credits(user_id):
     else:
         credits, last_date = row
         if last_date != today:
-            # اگر روز تغییر کرده باشد، اعتبار رایگان روزانه (۳ عدد) اضافه/تنظیم می‌شود
             new_credits = max(credits, 3)
             cursor.execute('UPDATE users SET credits = ?, last_reset_date = ? WHERE user_id = ?', (new_credits, today, user_id))
             conn.commit()
@@ -89,7 +81,7 @@ def check_and_reset_daily_credits(user_id):
 
 def get_credits(user_id):
     if user_id == ADMIN_CHAT_ID:
-        return 999999  # اعتبار نامحدود برای مدیر
+        return 999999
 
     check_and_reset_daily_credits(user_id)
     
@@ -114,7 +106,7 @@ def add_credits(user_id, amount):
 
 def use_credit(user_id):
     if user_id == ADMIN_CHAT_ID:
-        return True  # عدم کسر اعتبار از مدیر
+        return True
 
     check_and_reset_daily_credits(user_id)
     credits = get_credits(user_id)
@@ -128,9 +120,6 @@ def use_credit(user_id):
         return True
     return False
 
-# ----------------------------------------------------
-# سرویس دریافت قیمت طلا و ارز
-# ----------------------------------------------------
 def fetch_financial_prices():
     try:
         url = "https://api.nobitex.ir/v2/orderbook/all"
@@ -146,10 +135,6 @@ def fetch_financial_prices():
         return text
     except Exception:
         return "⚠️ در حال حاضر دریافت قیمت لحظه‌ای مقدور نیست. لطفاً دقایقی دیگر تلاش کنید."
-
-# ----------------------------------------------------
-# هندلرهای اصلی ربات
-# ----------------------------------------------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -201,10 +186,8 @@ async def price_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def buy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(BANK_CARD_TEXT, parse_mode="Markdown")
 
-# پردازش تصویر (تبدیل به PDF / دریافت رسید)
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    
     photo_file = await update.message.photo[-1].get_file()
     
     caption_for_admin = (
@@ -239,7 +222,6 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         caption="✅ تصویر شما با موفقیت به فایل PDF تبدیل شد."
     )
 
-# دستور مدیریت جهت شارژ کاربر (/addcredit USER_ID AMOUNT)
 async def add_credit_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_CHAT_ID:
         return
@@ -258,7 +240,6 @@ async def add_credit_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     except Exception:
         await update.message.reply_text("❌ فرمت نادرست است. استفاده صحیح:\n`/addcredit USER_ID AMOUNT`", parse_mode="Markdown")
 
-# پردازش متون
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     
@@ -271,9 +252,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("✨ درخواست شما دریافت شد و در حال پردازش توسط هوش مصنوعی است...")
 
-# ----------------------------------------------------
-# راه‌اندازی ربات
-# ----------------------------------------------------
 if __name__ == "__main__":
     init_db()
     
