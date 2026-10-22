@@ -1,7 +1,8 @@
-import os
+	mport os
 import sqlite3
 import logging
 import requests
+from datetime import datetime
 from io import BytesIO
 from PIL import Image
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -42,7 +43,7 @@ BANK_CARD_TEXT = """
 """
 
 # ----------------------------------------------------
-# مدیریت دیتابیس (SQLite)
+# مدیریت دیتابیس (SQLite) با قابلیت شارژ روزانه
 # ----------------------------------------------------
 DB_NAME = "bot_database.db"
 
@@ -52,28 +53,52 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
-            credits INTEGER DEFAULT 3
+            credits INTEGER DEFAULT 3,
+            last_reset_date TEXT
         )
     ''')
     conn.commit()
+    conn.close()
+
+def get_today_string():
+    return datetime.now().strftime("%Y-%m-%d")
+
+def check_and_reset_daily_credits(user_id):
+    """بررسی و شارژ مجدد ۳ اعتبار در صورت شروع روز جدید"""
+    if user_id == ADMIN_CHAT_ID:
+        return
+
+    today = get_today_string()
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT credits, last_reset_date FROM users WHERE user_id = ?', (user_id,))
+    row = cursor.fetchone()
+    
+    if not row:
+        cursor.execute('INSERT INTO users (user_id, credits, last_reset_date) VALUES (?, ?, ?)', (user_id, 3, today))
+        conn.commit()
+    else:
+        credits, last_date = row
+        if last_date != today:
+            # اگر روز تغییر کرده باشد، اعتبار رایگان روزانه (۳ عدد) اضافه/تنظیم می‌شود
+            new_credits = max(credits, 3)
+            cursor.execute('UPDATE users SET credits = ?, last_reset_date = ? WHERE user_id = ?', (new_credits, today, user_id))
+            conn.commit()
+            
     conn.close()
 
 def get_credits(user_id):
     if user_id == ADMIN_CHAT_ID:
         return 999999  # اعتبار نامحدود برای مدیر
 
+    check_and_reset_daily_credits(user_id)
+    
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute('SELECT credits FROM users WHERE user_id = ?', (user_id,))
     row = cursor.fetchone()
-    if row:
-        credits = row[0]
-    else:
-        cursor.execute('INSERT INTO users (user_id, credits) VALUES (?, ?)', (user_id, 3))
-        conn.commit()
-        credits = 3
     conn.close()
-    return credits
+    return row[0] if row else 3
 
 def add_credits(user_id, amount):
     conn = sqlite3.connect(DB_NAME)
@@ -83,7 +108,7 @@ def add_credits(user_id, amount):
     if row:
         cursor.execute('UPDATE users SET credits = credits + ? WHERE user_id = ?', (amount, user_id))
     else:
-        cursor.execute('INSERT INTO users (user_id, credits) VALUES (?, ?)', (user_id, 3 + amount))
+        cursor.execute('INSERT INTO users (user_id, credits, last_reset_date) VALUES (?, ?, ?)', (user_id, 3 + amount, get_today_string()))
     conn.commit()
     conn.close()
 
@@ -91,7 +116,9 @@ def use_credit(user_id):
     if user_id == ADMIN_CHAT_ID:
         return True  # عدم کسر اعتبار از مدیر
 
+    check_and_reset_daily_credits(user_id)
     credits = get_credits(user_id)
+    
     if credits > 0:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
@@ -135,12 +162,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    credit_display = "نامحدود (مدیریت)" if user_id == ADMIN_CHAT_ID else f"{credits} بار"
+    credit_display = "نامحدود (مدیریت)" if user_id == ADMIN_CHAT_ID else f"{credits} بار (روزانه)"
     
     welcome_text = (
         f"سلام {update.effective_user.first_name} عزیز! 👋\n"
         f"به ربات هوشمند **ای‌آی فنی** خوش آمدید.\n\n"
-        f"🎁 **اعتبار شما:** {credit_display}\n\n"
+        f"🎁 **اعتبار امروز شما:** {credit_display}\n"
+        f"*(هر روز ۳ اعتبار رایگان به حساب شما اضافه می‌شود)*\n\n"
         f"🛠 **امکانات ربات:**\n"
         f"▫️ حل فرمول‌ها و سوالات اکسل\n"
         f"▫️ تبدیل عکس و فایل به PDF\n"
@@ -153,7 +181,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()  # پاسخ به کلیک جهت رفع حالت در انتظار دکمه
+    await query.answer()
     user_id = query.from_user.id
     
     if query.data == "buy_credit":
@@ -161,7 +189,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "check_credit":
         credits = get_credits(user_id)
         credit_display = "نامحدود (مدیریت)" if user_id == ADMIN_CHAT_ID else f"{credits} بار"
-        await query.message.reply_text(f"📊 **اعتبار باقی‌مانده شما:** {credit_display}")
+        await query.message.reply_text(f"📊 **اعتبار باقی‌مانده امروز شما:** {credit_display}")
     elif query.data == "get_prices":
         prices = fetch_financial_prices()
         await query.message.reply_text(prices, parse_mode="Markdown")
@@ -177,7 +205,6 @@ async def buy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     
-    # اولویت اول: ثبت رسید برای مدیر
     photo_file = await update.message.photo[-1].get_file()
     
     caption_for_admin = (
@@ -196,9 +223,8 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
     
-    # تبدیل عکس به PDF برای کاربر
     if not use_credit(user.id):
-        await update.message.reply_text("❌ اعتبار رایگان شما به پایان رسیده است.\nجهت خرید اعتبار از دستور /buy استفاده کنید.")
+        await update.message.reply_text("❌ اعتبار رایگان امروز شما به پایان رسیده است.\nبرای استفاده بیشتر می‌توانید تا فردا صبر کنید یا جهت خرید اعتبار از دستور /buy استفاده کنید.")
         return
 
     photo_bytes = await photo_file.download_as_bytearray()
@@ -232,14 +258,14 @@ async def add_credit_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     except Exception:
         await update.message.reply_text("❌ فرمت نادرست است. استفاده صحیح:\n`/addcredit USER_ID AMOUNT`", parse_mode="Markdown")
 
-# پردازش متون و فایل‌ها
+# پردازش متون
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     
     if not use_credit(user_id):
         await update.message.reply_text(
-            "❌ اعتبار رایگان شما به پایان رسیده است.\n"
-            "جهت خرید اعتبار جدید از دکمه زیر یا دستور /buy استفاده کنید."
+            "❌ اعتبار رایگان امروز شما به پایان رسیده است.\n"
+            "برای استفاده بیشتر می‌توانید تا فردا صبر کنید یا جهت خرید اعتبار از دکمه زیر یا دستور /buy استفاده کنید."
         )
         return
 
