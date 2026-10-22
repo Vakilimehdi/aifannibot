@@ -18,7 +18,7 @@ from telegram.ext import (
 )
 
 # ----------------------------------------------------
-# وب‌سرور ساده برای نگه داشتن سرویس در Render
+# وب‌سرور برای فعال نگه داشتن سرویس در Render
 # ----------------------------------------------------
 class DummyServer(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -33,7 +33,7 @@ def run_dummy_server():
     server.serve_forever()
 
 # ----------------------------------------------------
-# تنظیمات اصلی و مدیریت
+# تنظیمات اصلی
 # ----------------------------------------------------
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -61,6 +61,9 @@ BANK_CARD_TEXT = """
 
 DB_NAME = "bot_database.db"
 
+# ----------------------------------------------------
+# دیتابیس و مدیریت اعتبار روزانه
+# ----------------------------------------------------
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -156,16 +159,35 @@ def fetch_financial_prices():
     except Exception:
         return "⚠️ در حال حاضر دریافت قیمت لحظه‌ای مقدور نیست. لطفاً دقایقی دیگر تلاش کنید."
 
+# ----------------------------------------------------
+# کیبورد اصلی شیشه‌ای
+# ----------------------------------------------------
+def get_main_keyboard():
+    keyboard = [
+        [
+            InlineKeyboardButton("📄 تبدیل عکس به PDF", callback_data="help_pdf"),
+            InlineKeyboardButton("📊 حل فرمول اکسل", callback_data="help_excel")
+        ],
+        [
+            InlineKeyboardButton("🎙 تبدیل ویس به متن", callback_data="help_voice"),
+            InlineKeyboardButton("🖼 تغییر سایز تصویر", callback_data="help_image")
+        ],
+        [
+            InlineKeyboardButton("💰 قیمت طلا و دلار", callback_data="get_prices")
+        ],
+        [
+            InlineKeyboardButton("💳 خرید اعتبار", callback_data="buy_credit"),
+            InlineKeyboardButton("📊 استعلام اعتبار", callback_data="check_credit")
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+# ----------------------------------------------------
+# هندلرهای دستورات و کلیک دکمه‌ها
+# ----------------------------------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     credits = get_credits(user_id)
-    
-    keyboard = [
-        [InlineKeyboardButton("💳 خرید اعتبار (کارت به کارت)", callback_data="buy_credit")],
-        [InlineKeyboardButton("📊 استعلام اعتبار باقی‌مانده", callback_data="check_credit")],
-        [InlineKeyboardButton("💰 قیمت لحظه‌ای طلا و دلار", callback_data="get_prices")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     
     credit_display = "نامحدود (مدیریت)" if user_id == ADMIN_CHAT_ID else f"{credits} بار (روزانه)"
     
@@ -174,30 +196,51 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"به ربات هوشمند **ای‌آی فنی** خوش آمدید.\n\n"
         f"🎁 **اعتبار امروز شما:** {credit_display}\n"
         f"*(هر روز ۳ اعتبار رایگان به حساب شما اضافه می‌شود)*\n\n"
-        f"🛠 **امکانات ربات:**\n"
-        f"▫️ حل فرمول‌ها و سوالات اکسل\n"
-        f"▫️ تبدیل عکس و فایل به PDF\n"
-        f"▫️ قیمت لحظه‌ای طلا و ارز (/price)\n"
-        f"▫️ تبدیل صوت و ویس به متن\n"
-        f"▫️ تغییر حجم و سایز عکس‌ها\n\n"
-        f"سوال، عکس یا فایل خود را ارسال کنید!"
+        f"از دکمه‌های زیر برای دسترسی سریع به امکانات استفاده کنید:"
     )
-    await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode="Markdown")
+    await update.message.reply_text(welcome_text, reply_markup=get_main_keyboard(), parse_mode="Markdown")
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     user_id = query.from_user.id
+    data = query.data
     
-    if query.data == "buy_credit":
+    if data == "buy_credit":
         await query.message.reply_text(BANK_CARD_TEXT, parse_mode="Markdown")
-    elif query.data == "check_credit":
+        
+    elif data == "check_credit":
         credits = get_credits(user_id)
         credit_display = "نامحدود (مدیریت)" if user_id == ADMIN_CHAT_ID else f"{credits} بار"
         await query.message.reply_text(f"📊 **اعتبار باقی‌مانده امروز شما:** {credit_display}")
-    elif query.data == "get_prices":
+        
+    elif data == "get_prices":
         prices = fetch_financial_prices()
         await query.message.reply_text(prices, parse_mode="Markdown")
+        
+    elif data == "help_pdf":
+        await query.message.reply_text(
+            "📄 **تبدیل عکس و فایل به PDF:**\n\n"
+            "کافی است تصویر یا مدرک مورد نظر خود را همین‌جا ارسال کنید تا ربات بلافاصله آن را به یک فایل PDF باکیفیت تبدیل کرده و برای شما بفرستد."
+        )
+        
+    elif data == "help_excel":
+        await query.message.reply_text(
+            "📊 **حل فرمول‌ها و سوالات اکسل:**\n\n"
+            "سوال یا فرمول مورد نظر خود را به صورت متنی بنویسید (مثلاً: «فرمول VLOOKUP برای ترکیب دو جدول») تا هوش مصنوعی فرمول دقیق را به همراه توضیحات ارسال کند."
+        )
+        
+    elif data == "help_voice":
+        await query.message.reply_text(
+            "🎙 **تبدیل صوت و ویس به متن:**\n\n"
+            "ویس یا فایل صوتی خود را ارسال کنید تا هوش مصنوعی آن را تحلیل کرده و متن آن را پیاده‌سازی کند."
+        )
+        
+    elif data == "help_image":
+        await query.message.reply_text(
+            "🖼 **تغییر حجم و سایز عکس:**\n\n"
+            "عکس مورد نظر را بفرستید و مشخص کنید چه ابعاد یا افزایشی برای کیفیت آن مد نظر دارید."
+        )
 
 async def price_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     prices = fetch_financial_prices()
@@ -273,12 +316,11 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✨ درخواست شما دریافت شد و در حال پردازش توسط هوش مصنوعی است...")
 
 # ----------------------------------------------------
-# راه‌اندازی هم‌زمان پورت وب و ربات تلگرام
+# اجرا
 # ----------------------------------------------------
 if __name__ == "__main__":
     init_db()
     
-    # اجرای وب‌سرور در یک Thread جداگانه جهت پاس کردن تست پورت Render
     threading.Thread(target=run_dummy_server, daemon=True).start()
     
     app = ApplicationBuilder().token(BOT_TOKEN).build()
