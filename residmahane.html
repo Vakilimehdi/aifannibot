@@ -871,15 +871,50 @@ function updateDirtyBadge() {
   }
 }
 
-function save() {
-  dirty = true;
+/* Debounced localStorage write: rapid successive changes (import, edits)
+   coalesce into a single write 400ms after the last change. `dirty` still
+   means "not yet saved into the HTML file" and is only cleared by the
+   save-to-file action, exactly as before, so the badge still appears
+   immediately on every change. flushSave() forces a pending write out
+   synchronously (before saving to file and before the page unloads). */
+var SAVE_DEBOUNCE_MS = 400;
+var saveTimer = null;
+var savePending = false;
+
+function writeStateToStorage() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(state));
     saveError = false;
   } catch (e) {
     saveError = true;
   }
+}
+
+function refreshSaveWarnSlot() {
+  if (!saveError) return;
+  var slot = document.getElementById('save-warn-slot');
+  if (slot) slot.innerHTML = saveWarn();
+}
+
+function flushSave() {
+  if (!savePending) return;
+  if (saveTimer !== null) { clearTimeout(saveTimer); saveTimer = null; }
+  savePending = false;
+  writeStateToStorage();
+  refreshSaveWarnSlot();
+}
+
+function save() {
+  dirty = true;
   updateDirtyBadge();
+  savePending = true;
+  if (saveTimer !== null) clearTimeout(saveTimer);
+  saveTimer = setTimeout(function () {
+    saveTimer = null;
+    savePending = false;
+    writeStateToStorage();
+    refreshSaveWarnSlot();
+  }, SAVE_DEBOUNCE_MS);
 }
 
 function saveToHtmlFile() {
@@ -999,11 +1034,30 @@ function applyImport(wb, fileName) {
     productRows: catalog ? catalog.rows.length : 0,
     at: nowLabel()
   };
+  invalidateCaches();
   save();
   return { ok: true, months: months, receiptRows: receipts.records.length, productRows: catalog ? catalog.rows.length : 0 };
 }
 
 /* ================= report computation ================= */
+/* ================= cached lookups (months / groups / search) =================
+   Distinct months and groups depend only on the receipts, so they are
+   computed once and cached until the data changes (invalidateCaches).
+   Group sort keys are a pure function of the group name and are memoized,
+   so a sort never recomputes the same key twice. */
+var distinctCache = { months: null, groups: null };
+var groupKeyCache = new Map();
+var catalogSearchIndex = null;
+var reportShellStale = true;
+
+function invalidateCaches() {
+  distinctCache.months = null;
+  distinctCache.groups = null;
+  groupKeyCache.clear();
+  catalogSearchIndex = null;
+  reportShellStale = true;
+}
+
 function groupSortKey(name) {
   var s = toLatinDigits(name).replace(/٫/g, '.').replace(/\//g, '.');
   var m = s.match(/\d+(?:\.\d+)?/);
@@ -1013,23 +1067,36 @@ function groupSortKey(name) {
     name: s
   };
 }
-function compareGroups(a, b) {
-  var ka = groupSortKey(a), kb = groupSortKey(b);
+function groupSortKeyCached(name) {
+  var k = groupKeyCache.get(name);
+  if (!k) { k = groupSortKey(name); groupKeyCache.set(name, k); }
+  return k;
+}
+function compareGroupKeys(ka, kb) {
   var byPrefix = ka.prefix.localeCompare(kb.prefix, 'fa');
   if (byPrefix) return byPrefix;
   if (ka.size !== kb.size) return ka.size - kb.size;
   return ka.name.localeCompare(kb.name, 'fa');
 }
+function compareGroups(a, b) {
+  return compareGroupKeys(groupSortKeyCached(a), groupSortKeyCached(b));
+}
 
 function distinctMonths() {
+  if (distinctCache.months) return distinctCache.months;
   var set = new Set();
   state.receipts.forEach(function (r) { set.add(r.pd.slice(0, 7)); });
-  return Array.from(set).sort().reverse();
+  distinctCache.months = Array.from(set).sort().reverse();
+  return distinctCache.months;
 }
 function distinctGroups() {
+  if (distinctCache.groups) return distinctCache.groups;
   var set = new Set();
   state.receipts.forEach(function (r) { set.add(r.g); });
-  return Array.from(set).sort(compareGroups);
+  var decorated = Array.from(set).map(function (g) { return { name: g, key: groupSortKeyCached(g) }; });
+  decorated.sort(function (a, b) { return compareGroupKeys(a.key, b.key); });
+  distinctCache.groups = decorated.map(function (d) { return d.name; });
+  return distinctCache.groups;
 }
 function latestMonth() {
   var months = distinctMonths();
@@ -1138,23 +1205,21 @@ function reportRowsHtml(rows, showMonth) {
   return out;
 }
 
-function renderReport() {
-  var f = readFilter(ui.filter);
-  var rows = reportRows(f);
-  var total = rows.reduce(function (acc, r) { return acc + (r.mainQty || 0); }, 0);
-  var showMonth = !f.month;
-  var filterLine = filterText(f);
-
+/* Report page: the shell (header, filter form, table skeleton) is built once
+   and kept across filter changes; only the result regions are updated.
+   Listeners live on #app (delegated, see the boot section) and are bound once,
+   so the date pickers are created once per shell instead of on every render. */
+function buildReportShell(f) {
   app.innerHTML =
     '<div class="page-head"><div>' +
     '<h1>گزارش رسید ماهانه</h1>' +
-    '<p class="subtle">' + esc(filterLine) + '</p></div>' +
+    '<p class="subtle" id="report-filter-line"></p></div>' +
     '<div class="actions">' +
     '<button class="btn btn-ghost" id="btn-export">خروجی Excel</button>' +
     '<button class="btn btn-primary" id="btn-print">چاپ / PDF</button>' +
     '</div></div>' +
-    saveWarn() +
-    (f.warnings.length ? '<div class="banner warn">' + esc(f.warnings.join(' ')) + '</div>' : '') +
+    '<div id="save-warn-slot">' + saveWarn() + '</div>' +
+    '<div id="report-warnings"></div>' +
     '<div class="card"><form class="filters" id="filter-form">' +
     '<div class="field"><label for="f-month">ماه</label><select id="f-month" name="month">' + monthOptions(f.month) + '</select></div>' +
     '<div class="field"><label for="f-from">از تاریخ (مجوز ورود)</label><input type="text" class="js-date" id="f-from" name="from" placeholder="۱۴۰۵/۰۵/۰۱" value="' + esc(f.from ? faDigits(f.from) : '') + '"></div>' +
@@ -1163,30 +1228,65 @@ function renderReport() {
     '<div class="actions"><button type="submit" class="btn btn-primary">اعمال فیلتر</button>' +
     '<button type="button" class="btn btn-ghost" id="btn-clear">پاک‌کردن</button></div>' +
     '</form></div>' +
-    '<div class="subtle small" style="margin-bottom:8px">' + faDigits(rows.length) + ' ردیف &nbsp;|&nbsp; ' + fmtNum(total, 2) + ' کیلوگرم</div>' +
+    '<div class="subtle small" style="margin-bottom:8px" id="report-count"></div>' +
     '<div class="table-wrap"><table class="data report-table">' +
     '<thead><tr><th style="width:60px">ردیف</th><th>گروه محصول</th><th style="width:220px">مقدار به واحد اصلی (کیلوگرم)</th></tr></thead>' +
-    '<tbody>' + reportRowsHtml(rows, showMonth) + '</tbody>' +
-    '<tfoot><tr><td></td><td class="text">جمع کل</td><td class="num-cell">' + fmtNum(total, 2) + '</td></tr></tfoot>' +
+    '<tbody id="report-tbody"></tbody>' +
+    '<tfoot><tr><td></td><td class="text">جمع کل</td><td class="num-cell" id="report-total"></td></tr></tfoot>' +
     '</table></div>';
 
   setupPickers();
-  document.getElementById('filter-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    ui.filter = {
-      month: document.getElementById('f-month').value,
-      from: document.getElementById('f-from').value,
-      to: document.getElementById('f-to').value,
-      group: document.getElementById('f-group').value
-    };
-    render();
-  });
-  document.getElementById('btn-clear').addEventListener('click', function () {
-    ui.filter = { month: undefined, from: '', to: '', group: '' };
-    render();
-  });
-  document.getElementById('btn-export').addEventListener('click', function () { doExport(); });
-  document.getElementById('btn-print').addEventListener('click', function () { doPrint(); });
+}
+
+/* Bring the filter controls in line with the normalized filter. This is what
+   the old full re-render did implicitly (invalid dates were cleared from the
+   inputs, a stale month/group fell back to the first option). */
+function syncReportFilterControls(f) {
+  var monthSel = document.getElementById('f-month');
+  if (monthSel) {
+    var monthValue = 'all';
+    for (var i = 0; i < monthSel.options.length; i += 1) {
+      if (monthSel.options[i].value === f.month) { monthValue = f.month; break; }
+    }
+    monthSel.value = monthValue;
+  }
+  var fromInput = document.getElementById('f-from');
+  if (fromInput) fromInput.value = f.from ? faDigits(f.from) : '';
+  var toInput = document.getElementById('f-to');
+  if (toInput) toInput.value = f.to ? faDigits(f.to) : '';
+  var groupSel = document.getElementById('f-group');
+  if (groupSel) {
+    var groupValue = '';
+    for (var j = 0; j < groupSel.options.length; j += 1) {
+      if (groupSel.options[j].value === f.group) { groupValue = f.group; break; }
+    }
+    groupSel.value = groupValue;
+  }
+}
+
+function updateReportResults() {
+  var f = readFilter(ui.filter);
+  var rows = reportRows(f);
+  var total = rows.reduce(function (acc, r) { return acc + (r.mainQty || 0); }, 0);
+  var showMonth = !f.month;
+
+  syncReportFilterControls(f);
+  document.getElementById('report-filter-line').textContent = filterText(f);
+  document.getElementById('save-warn-slot').innerHTML = saveWarn();
+  document.getElementById('report-warnings').innerHTML =
+    f.warnings.length ? '<div class="banner warn">' + esc(f.warnings.join(' ')) + '</div>' : '';
+  document.getElementById('report-count').innerHTML =
+    faDigits(rows.length) + ' ردیف &nbsp;|&nbsp; ' + fmtNum(total, 2) + ' کیلوگرم';
+  document.getElementById('report-tbody').innerHTML = reportRowsHtml(rows, showMonth);
+  document.getElementById('report-total').textContent = fmtNum(total, 2);
+}
+
+function renderReport() {
+  if (!document.getElementById('report-tbody') || reportShellStale) {
+    buildReportShell(readFilter(ui.filter));
+    reportShellStale = false;
+  }
+  updateReportResults();
 }
 
 function renderImport() {
@@ -1234,7 +1334,7 @@ function renderImport() {
   app.innerHTML =
     '<div class="page-head"><div><h1>ایمپورت اکسل</h1>' +
     '<p class="subtle">فایل گزارش رسید محصول را بارگذاری کنید؛ کاتالوگ و رسیدها خودکار به‌روزرسانی می‌شوند.</p></div></div>' +
-    saveWarn() +
+    '<div id="save-warn-slot">' + saveWarn() + '</div>' +
     banner(ui.importError, 'err') + unknownsHtml + errorsHtml + resultHtml +
     '<div class="card"><h2>بارگذاری فایل</h2>' +
     '<form id="import-form"><div class="field" style="max-width:420px">' +
@@ -1254,58 +1354,24 @@ function renderImport() {
     '</ul></div>' +
     '<div class="card"><h2>آخرین ایمپورت</h2>' + lastHtml + '</div>';
 
-  app.querySelectorAll('[data-add-unknown]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var code = btn.getAttribute('data-add-unknown');
-      var tr = btn.closest('tr');
-      var val = function (k) { return tr.querySelector('[data-f="' + k + '"]').value.trim(); };
-      var n = val('n'), fam = val('f'), cat = val('g');
-      var missing = [];
-      if (!fam) missing.push('عنوان');
-      if (!cat) missing.push('دسته‌بندی');
-      if (!n) missing.push('نام محصول');
-      if (missing.length) {
-        alert('وارد کردن ' + missing.join('، ') + ' برای کد ' + faDigits(code) + ' الزامی است.');
-        return;
-      }
-      state.products.push({ c: code, f: fam, g: cat, n: n });
-      save();
-      ui.importUnknowns = (ui.importUnknowns || []).filter(function (u) { return u.code !== code; });
-      render();
-    });
-  });
-  var viewBtn = document.getElementById('btn-view-report');
-  if (viewBtn) {
-    viewBtn.addEventListener('click', function () {
-      ui.page = 'report';
-      ui.filter = { month: (ui.importResult && ui.importResult.months && ui.importResult.months[0]) || 'all', from: '', to: '', group: '' };
-      render();
+}
+
+/* Precomputed catalog search strings: the concatenation is built once per
+   product (rebuilt when the catalog changes) instead of on every search.
+   The string is kept exactly as before, so matching stays identical. */
+function catalogSearchText(p) {
+  if (!catalogSearchIndex) {
+    catalogSearchIndex = new Map();
+    state.products.forEach(function (prod) {
+      catalogSearchIndex.set(prod, prod.c + ' ' + prod.n + ' ' + prod.f + ' ' + prod.g);
     });
   }
-  document.getElementById('import-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var input = document.getElementById('import-file');
-    var file = input.files && input.files[0];
-    if (!file) return;
-    var btn = document.getElementById('import-btn');
-    btn.disabled = true;
-    btn.textContent = 'در حال پردازش…';
-    ui.importError = null;
-    ui.importErrors = [];
-    ui.importUnknowns = [];
-    ui.importResult = null;
-    file.arrayBuffer().then(function (buf) { return readXlsx(buf); }).then(function (wb) {
-      var result = applyImport(wb, file.name);
-      if (result.ok) ui.importResult = result;
-      else { ui.importError = result.message; ui.importErrors = result.errors || []; ui.importUnknowns = result.unknowns || []; }
-      render();
-    }).catch(function (err) {
-      ui.importError = err && err.message ? err.message : 'خواندن فایل با خطا روبه‌رو شد.';
-      ui.importErrors = [];
-      ui.importUnknowns = [];
-      render();
-    });
-  });
+  var s = catalogSearchIndex.get(p);
+  if (s === undefined) {
+    s = p.c + ' ' + p.n + ' ' + p.f + ' ' + p.g;
+    catalogSearchIndex.set(p, s);
+  }
+  return s;
 }
 
 function renderCatalog() {
@@ -1313,7 +1379,7 @@ function renderCatalog() {
   var size = 100;
   var filtered = state.products.filter(function (p) {
     if (!q) return true;
-    return (p.c + ' ' + p.n + ' ' + p.f + ' ' + p.g).indexOf(q) !== -1;
+    return catalogSearchText(p).indexOf(q) !== -1;
   });
   var pages = Math.max(1, Math.ceil(filtered.length / size));
   var page = Math.min(Math.max(1, ui.catalogPage), pages);
@@ -1351,7 +1417,7 @@ function renderCatalog() {
     '<div class="page-head"><div><h1>کاتالوگ کالا</h1>' +
     '<p class="subtle">' + fmtInt(filtered.length) + ' کد کالا — مرجع تشخیص گروه محصول</p></div>' +
     '<div class="actions"><button class="btn btn-primary" id="btn-add">افزودن دستی کالا</button></div></div>' +
-    saveWarn() +
+    '<div id="save-warn-slot">' + saveWarn() + '</div>' +
     (ui.catalogMsg ? banner(ui.catalogMsg.text, ui.catalogMsg.type) : '') +
     '<div class="card"><h2>ایمپورت کاتالوگ از اکسل</h2>' +
     '<form id="catalog-import-form"><div class="field" style="max-width:420px">' +
@@ -1372,76 +1438,6 @@ function renderCatalog() {
     '<thead><tr><th style="width:150px">کد کالا</th><th style="width:200px">عنوان</th><th style="width:220px">دسته‌بندی (گروه محصول)</th><th>نام محصول</th><th style="width:90px" class="no-print">عملیات</th></tr></thead>' +
     '<tbody>' + rowsHtml + '</tbody></table></div>' + pager;
 
-  document.getElementById('catalog-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    ui.catalogQ = document.getElementById('catalog-q').value;
-    ui.catalogPage = 1;
-    render();
-  });
-  document.getElementById('catalog-clear').addEventListener('click', function () {
-    ui.catalogQ = '';
-    ui.catalogPage = 1;
-    render();
-  });
-  document.getElementById('btn-add').addEventListener('click', function () {
-    ui.form = { mode: 'new', code: '', f: '', g: '', n: '' };
-    render();
-  });
-  document.getElementById('catalog-import-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var file = document.getElementById('catalog-file').files[0];
-    if (!file) return;
-    var btn = document.getElementById('catalog-import-btn');
-    btn.disabled = true;
-    btn.textContent = 'در حال پردازش…';
-    file.arrayBuffer().then(function (buf) { return readXlsx(buf); }).then(function (wb) {
-      var cat = extractCatalog(wb);
-      if (!cat || !cat.rows.length) throw new Error('شیتی با سرستون‌های «کد، عنوان، دسته بندی، نام محصول» یا ردیف معتبر پیدا نشد؛ کاتالوگ قبلی دست‌نخورده ماند.');
-      var map = new Map();
-      cat.rows.forEach(function (p) { map.set(p.c, p); });
-      var dups = cat.rows.length - map.size;
-      if (!confirm('کاتالوگ فعلی (' + state.products.length + ' کالا) کاملاً پاک و با ' + map.size + ' کالای فایل جایگزین می‌شود. ادامه می‌دهید؟')) { render(); return; }
-      state.products = Array.from(map.values());
-      var unmatched = 0;
-      state.receipts.forEach(function (r) {
-        var p = map.get(r.ic);
-        if (p) r.g = p.g; else unmatched += 1;
-      });
-      save();
-      ui.catalogQ = '';
-      ui.catalogPage = 1;
-      ui.catalogMsg = { type: 'ok', text: 'کاتالوگ جایگزین شد: ' + faDigits(map.size) + ' کالا' +
-        (dups ? ' (' + faDigits(dups) + ' ردیف تکراری حذف شد)' : '') +
-        (unmatched ? ' — ' + faDigits(unmatched) + ' ردیف رسید کدی خارج از کاتالوگ جدید دارد و گروه قبلی را نگه داشت.' : '') };
-      render();
-    }).catch(function (err) {
-      ui.catalogMsg = { type: 'err', text: err && err.message ? err.message : 'خواندن فایل با خطا روبه‌رو شد.' };
-      render();
-    });
-  });
-  app.querySelectorAll('[data-copy]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var p = productMap().get(btn.getAttribute('data-copy'));
-      if (!p) return;
-      ui.form = { mode: 'copy', code: '', f: p.f, g: p.g, n: p.n, sourceCode: p.c };
-      render();
-    });
-  });
-  app.querySelectorAll('[data-edit]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var p = productMap().get(btn.getAttribute('data-edit'));
-      if (!p) return;
-      ui.form = { mode: 'edit', code: p.c, f: p.f, g: p.g, n: p.n };
-      render();
-    });
-  });
-  app.querySelectorAll('[data-page-no]').forEach(function (a) {
-    a.addEventListener('click', function (e) {
-      e.preventDefault();
-      ui.catalogPage = Number(a.getAttribute('data-page-no'));
-      render();
-    });
-  });
 }
 
 function renderCatalogForm() {
@@ -1474,42 +1470,6 @@ function renderCatalogForm() {
     '<button type="button" class="btn btn-ghost" id="form-cancel">انصراف</button>' +
     '</div></div></form>';
 
-  document.getElementById('form-back').addEventListener('click', function () { ui.form = null; render(); });
-  document.getElementById('form-cancel').addEventListener('click', function () { ui.form = null; render(); });
-  document.getElementById('catalog-form-page').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var code = toLatinDigits(document.getElementById('p-code').value || '').trim();
-    var f = document.getElementById('p-family').value.trim();
-    var g = document.getElementById('p-category').value.trim();
-    var n = document.getElementById('p-name').value.trim();
-    var errors = [];
-    if (!edit && !/^\d{6,20}$/.test(code)) errors.push('کد کالا باید ۶ تا ۲۰ رقم باشد.');
-    if (!f) errors.push('عنوان الزامی است.');
-    if (!g) errors.push('دسته‌بندی الزامی است.');
-    if (!n) errors.push('نام محصول الزامی است.');
-    var pmap = productMap();
-    if (!edit && pmap.has(code)) errors.push('این کد کالا قبلاً ثبت شده است.');
-    if (errors.length) {
-      ui.form = { mode: form.mode, code: code, f: f, g: g, n: n, sourceCode: form.sourceCode, error: errors.join(' ') };
-      render();
-      return;
-    }
-    if (edit) {
-      var p = pmap.get(form.code);
-      if (p) {
-        p.f = f; p.g = g; p.n = n;
-        state.receipts.forEach(function (r) { if (r.ic === p.c) r.g = g; });
-      }
-    } else {
-      state.products.push({ c: code, f: f, g: g, n: n });
-    }
-    save();
-    ui.form = null;
-    ui.catalogQ = code;
-    ui.catalogPage = 1;
-    ui.page = 'catalog';
-    render();
-  });
 }
 
 /* ================= export & print ================= */
@@ -1672,9 +1632,6 @@ function setupPicker(input) {
   input.addEventListener('focus', open);
   input.addEventListener('click', open);
   input.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-  document.addEventListener('click', function (e) {
-    if (!wrap.contains(e.target)) close();
-  });
 }
 
 /* ================= navigation & boot ================= */
@@ -1700,10 +1657,210 @@ nav.addEventListener('click', function (e) {
   render();
 });
 
+/* One delegated document click closes any open date-picker popup when the
+   click lands outside its wrapper (replaces one document listener per
+   picker, which used to accumulate on every re-render). */
+document.addEventListener('click', function (e) {
+  var wrap = e.target && e.target.closest ? e.target.closest('.dp-wrap') : null;
+  document.querySelectorAll('.dp-pop.open').forEach(function (pop) {
+    if (!wrap || !wrap.contains(pop)) pop.classList.remove('open');
+  });
+});
+
+/* Delegated events on #app: every button/form inside a page is handled here,
+   bound once at boot. Page renderers only build HTML and never re-bind, so
+   filtering or paging no longer recreates listeners (or date pickers). */
+app.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t || !t.closest) return;
+  var el;
+  if ((el = t.closest('#btn-export'))) { doExport(); return; }
+  if ((el = t.closest('#btn-print'))) { doPrint(); return; }
+  if ((el = t.closest('#btn-clear'))) {
+    ui.filter = { month: undefined, from: '', to: '', group: '' };
+    render();
+    return;
+  }
+  if ((el = t.closest('#btn-view-report'))) {
+    ui.page = 'report';
+    ui.filter = { month: (ui.importResult && ui.importResult.months && ui.importResult.months[0]) || 'all', from: '', to: '', group: '' };
+    render();
+    return;
+  }
+  if ((el = t.closest('#btn-add'))) {
+    ui.form = { mode: 'new', code: '', f: '', g: '', n: '' };
+    render();
+    return;
+  }
+  if ((el = t.closest('#form-back')) || (el = t.closest('#form-cancel'))) {
+    ui.form = null;
+    render();
+    return;
+  }
+  if ((el = t.closest('#catalog-clear'))) {
+    ui.catalogQ = '';
+    ui.catalogPage = 1;
+    render();
+    return;
+  }
+  if ((el = t.closest('[data-add-unknown]'))) {
+    var code = el.getAttribute('data-add-unknown');
+    var tr = el.closest('tr');
+    var val = function (k) { return tr.querySelector('[data-f="' + k + '"]').value.trim(); };
+    var n = val('n'), fam = val('f'), cat = val('g');
+    var missing = [];
+    if (!fam) missing.push('عنوان');
+    if (!cat) missing.push('دسته‌بندی');
+    if (!n) missing.push('نام محصول');
+    if (missing.length) {
+      alert('وارد کردن ' + missing.join('، ') + ' برای کد ' + faDigits(code) + ' الزامی است.');
+      return;
+    }
+    state.products.push({ c: code, f: fam, g: cat, n: n });
+    invalidateCaches();
+    save();
+    ui.importUnknowns = (ui.importUnknowns || []).filter(function (u) { return u.code !== code; });
+    render();
+    return;
+  }
+  if ((el = t.closest('[data-copy]'))) {
+    var p = productMap().get(el.getAttribute('data-copy'));
+    if (!p) return;
+    ui.form = { mode: 'copy', code: '', f: p.f, g: p.g, n: p.n, sourceCode: p.c };
+    render();
+    return;
+  }
+  if ((el = t.closest('[data-edit]'))) {
+    var pe = productMap().get(el.getAttribute('data-edit'));
+    if (!pe) return;
+    ui.form = { mode: 'edit', code: pe.c, f: pe.f, g: pe.g, n: pe.n };
+    render();
+    return;
+  }
+  if ((el = t.closest('[data-page-no]'))) {
+    e.preventDefault();
+    ui.catalogPage = Number(el.getAttribute('data-page-no'));
+    render();
+    return;
+  }
+});
+
+app.addEventListener('submit', function (e) {
+  var form = e.target;
+  if (!form || !form.id) return;
+  if (form.id === 'filter-form') {
+    e.preventDefault();
+    ui.filter = {
+      month: document.getElementById('f-month').value,
+      from: document.getElementById('f-from').value,
+      to: document.getElementById('f-to').value,
+      group: document.getElementById('f-group').value
+    };
+    render();
+  } else if (form.id === 'import-form') {
+    e.preventDefault();
+    var input = document.getElementById('import-file');
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var btn = document.getElementById('import-btn');
+    btn.disabled = true;
+    btn.textContent = 'در حال پردازش…';
+    ui.importError = null;
+    ui.importErrors = [];
+    ui.importUnknowns = [];
+    ui.importResult = null;
+    file.arrayBuffer().then(function (buf) { return readXlsx(buf); }).then(function (wb) {
+      var result = applyImport(wb, file.name);
+      if (result.ok) ui.importResult = result;
+      else { ui.importError = result.message; ui.importErrors = result.errors || []; ui.importUnknowns = result.unknowns || []; }
+      render();
+    }).catch(function (err) {
+      ui.importError = err && err.message ? err.message : 'خواندن فایل با خطا روبه‌رو شد.';
+      ui.importErrors = [];
+      ui.importUnknowns = [];
+      render();
+    });
+  } else if (form.id === 'catalog-form') {
+    e.preventDefault();
+    ui.catalogQ = document.getElementById('catalog-q').value;
+    ui.catalogPage = 1;
+    render();
+  } else if (form.id === 'catalog-import-form') {
+    e.preventDefault();
+    var cfile = document.getElementById('catalog-file').files[0];
+    if (!cfile) return;
+    var cbtn = document.getElementById('catalog-import-btn');
+    cbtn.disabled = true;
+    cbtn.textContent = 'در حال پردازش…';
+    cfile.arrayBuffer().then(function (buf) { return readXlsx(buf); }).then(function (wb) {
+      var cat = extractCatalog(wb);
+      if (!cat || !cat.rows.length) throw new Error('شیتی با سرستون‌های «کد، عنوان، دسته بندی، نام محصول» یا ردیف معتبر پیدا نشد؛ کاتالوگ قبلی دست‌نخورده ماند.');
+      var map = new Map();
+      cat.rows.forEach(function (p) { map.set(p.c, p); });
+      var dups = cat.rows.length - map.size;
+      if (!confirm('کاتالوگ فعلی (' + state.products.length + ' کالا) کاملاً پاک و با ' + map.size + ' کالای فایل جایگزین می‌شود. ادامه می‌دهید؟')) { render(); return; }
+      state.products = Array.from(map.values());
+      var unmatched = 0;
+      state.receipts.forEach(function (r) {
+        var p = map.get(r.ic);
+        if (p) r.g = p.g; else unmatched += 1;
+      });
+      invalidateCaches();
+      save();
+      ui.catalogQ = '';
+      ui.catalogPage = 1;
+      ui.catalogMsg = { type: 'ok', text: 'کاتالوگ جایگزین شد: ' + faDigits(map.size) + ' کالا' +
+        (dups ? ' (' + faDigits(dups) + ' ردیف تکراری حذف شد)' : '') +
+        (unmatched ? ' — ' + faDigits(unmatched) + ' ردیف رسید کدی خارج از کاتالوگ جدید دارد و گروه قبلی را نگه داشت.' : '') };
+      render();
+    }).catch(function (err) {
+      ui.catalogMsg = { type: 'err', text: err && err.message ? err.message : 'خواندن فایل با خطا روبه‌رو شد.' };
+      render();
+    });
+  } else if (form.id === 'catalog-form-page') {
+    e.preventDefault();
+    var fstate = ui.form || { mode: 'new', code: '', f: '', g: '', n: '' };
+    var edit = fstate.mode === 'edit';
+    var code = toLatinDigits(document.getElementById('p-code').value || '').trim();
+    var f = document.getElementById('p-family').value.trim();
+    var g = document.getElementById('p-category').value.trim();
+    var n = document.getElementById('p-name').value.trim();
+    var errors = [];
+    if (!edit && !/^\d{6,20}$/.test(code)) errors.push('کد کالا باید ۶ تا ۲۰ رقم باشد.');
+    if (!f) errors.push('عنوان الزامی است.');
+    if (!g) errors.push('دسته‌بندی الزامی است.');
+    if (!n) errors.push('نام محصول الزامی است.');
+    var pmap = productMap();
+    if (!edit && pmap.has(code)) errors.push('این کد کالا قبلاً ثبت شده است.');
+    if (errors.length) {
+      ui.form = { mode: fstate.mode, code: code, f: f, g: g, n: n, sourceCode: fstate.sourceCode, error: errors.join(' ') };
+      render();
+      return;
+    }
+    if (edit) {
+      var p = pmap.get(fstate.code);
+      if (p) {
+        p.f = f; p.g = g; p.n = n;
+        state.receipts.forEach(function (r) { if (r.ic === p.c) r.g = g; });
+      }
+    } else {
+      state.products.push({ c: code, f: f, g: g, n: n });
+    }
+    invalidateCaches();
+    save();
+    ui.form = null;
+    ui.catalogQ = code;
+    ui.catalogPage = 1;
+    ui.page = 'catalog';
+    render();
+  }
+});
+
 // دکمه ذخیره در فایل HTML
 document.getElementById('btn-save-html').addEventListener('click', function () {
   if (!state) return;
   save();
+  flushSave();
   if (saveToHtmlFile()) {
     dirty = false;
     updateDirtyBadge();
@@ -1713,6 +1870,7 @@ document.getElementById('btn-save-html').addEventListener('click', function () {
 
 // هشدار هنگام بستن صفحه با تغییرات ذخیره‌نشده
 window.addEventListener('beforeunload', function (e) {
+  flushSave();
   if (dirty) {
     e.preventDefault();
     e.returnValue = '';
