@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>گزارش رسید ماهانه</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,"Vazirmatn",Arial,sans-serif;font-size:14px;background:#f3f6fa;color:#1d2733;line-height:1.7}
+.topbar{background:#1f3a5f;color:#fff;position:sticky;top:0;z-index:20}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.brand{font-weight:bold;font-size:16px}
+.brand span{font-weight:normal;opacity:.7;font-size:12px;margin-right:8px}
+.nav{display:flex;gap:6px}
+.nav a{color:#dbe6f5;padding:6px 14px;border-radius:6px;cursor:pointer;text-decoration:none}
+.nav a:hover{background:rgba(255,255,255,.12)}
+.nav a.active{background:#fff;color:#1f3a5f;font-weight:bold}
+.container{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+h1{margin:0 0 4px;font-size:20px;color:#1f3a5f}
+h2{margin:0 0 10px;font-size:16px;color:#1f3a5f}
+.subtle{color:#5b6b7e;margin:0}
+.small{font-size:12px}
+.muted{color:#8a97a8}
+.actions{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.btn{font-family:inherit;font-size:13px;border:1px solid transparent;border-radius:6px;padding:8px 16px;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn-primary{background:#1f3a5f;color:#fff}
+.btn-primary:hover{background:#2a4d7d}
+.btn-ghost{background:#fff;color:#1f3a5f;border-color:#b9c8db}
+.btn-ghost:hover{background:#eef3f9}
+.btn-sm{padding:3px 10px;font-size:12px}
+.banner{padding:10px 14px;border-radius:6px;margin-bottom:12px;border:1px solid}
+.banner.ok{background:#e8f6ec;border-color:#9ad3a8;color:#1d5a2e}
+.banner.warn{background:#fff6e0;border-color:#e8cf8a;color:#7a5a00}
+.banner.err{background:#fdeaea;border-color:#e6a1a1;color:#8a1f1f}
+.card{background:#fff;border:1px solid #d8e1ec;border-radius:10px;padding:16px;margin-bottom:16px}
+.filters{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:160px}
+.field.wide{min-width:240px;flex:1}
+.field label{font-size:12px;color:#5b6b7e}
+input[type=text],select,input[type=file]{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid #b9c8db;border-radius:6px;background:#fff;width:100%}
+input[readonly]{background:#eef1f5}
+.grid-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-foot{display:flex;gap:8px;margin-top:16px}
+.table-wrap{background:#fff;border:1px solid #d8e1ec;border-radius:10px;overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse}
+table.data th,table.lines-table th{background:#1f3a5f;color:#fff;padding:9px 10px;text-align:center;font-size:13px}
+table.data td,table.lines-table td{padding:8px 10px;border-bottom:1px solid #e3eaf3;text-align:center}
+table.data td.text{text-align:right}
+table.data tbody tr:nth-child(even){background:#f7f9fc}
+table.data tfoot td{background:#e3eaf3;font-weight:bold;padding:9px 10px;text-align:center}
+table.data tfoot td.text{text-align:right}
+tr.month-row td{background:#e3eaf3!important;font-weight:bold;color:#1f3a5f;text-align:right}
+td.empty{padding:24px;color:#8a97a8}
+.num-cell{font-variant-numeric:tabular-nums}
+.ltr{direction:ltr}
+.group-tag{background:#eaf1fb;color:#1f3a5f;padding:2px 8px;border-radius:10px;font-size:12px}
+.rule-list{margin:14px 0 0;padding:0 18px;color:#44546a}
+.rule-list li{margin-bottom:4px}
+.error-list{margin:0;padding:0 18px;color:#8a1f1f;max-height:260px;overflow:auto}
+.lines-table input{padding:5px 8px}
+.pagination{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pagination a,.pagination .current{padding:4px 10px;border:1px solid #b9c8db;border-radius:6px;background:#fff;color:#1f3a5f;text-decoration:none}
+.pagination .current{background:#1f3a5f;color:#fff}
+.print-head{text-align:center;margin-bottom:12px}
+.print-title{font-size:20px;font-weight:bold;color:#1f3a5f}
+.dp-wrap{position:relative}
+.dp-pop{display:none;position:absolute;top:100%;right:0;z-index:30;background:#fff;border:1px solid #b9c8db;border-radius:8px;padding:8px;width:260px;box-shadow:0 6px 20px rgba(0,0,0,.15);margin-top:4px}
+.dp-pop.open{display:block}
+.dp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dp-head button{border:0;background:#eef3f9;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:16px}
+.dp-title{font-weight:bold;color:#1f3a5f}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.dp-grid .wd{font-size:11px;color:#8a97a8;padding:2px 0}
+.dp-grid button{border:0;background:transparent;border-radius:6px;padding:5px 0;cursor:pointer;font-family:inherit}
+.dp-grid button:hover{background:#eef3f9}
+.dp-grid button.today{border:1px solid #1f3a5f}
+.dp-grid button.sel{background:#1f3a5f;color:#fff}
+@media(max-width:640px){.grid-form{grid-template-columns:1fr}}
+@media print{.topbar,.no-print,.actions,.filters{display:none!important}body{background:#fff}.card,.table-wrap{border:0}}
+</style>
+</head>
+<body>
+<script type="application/json" id="embedded-data">
+{"products":[],"receipts":[],"importRec":null}
+</script>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">گزارش رسید ماهانه <span>انبار و تولید</span></div>
+    <nav class="nav" id="nav">
+      <a data-page="report" class="active">گزارش</a>
+      <a data-page="import">ایمپورت اکسل</a>
+      <a data-page="catalog">کاتالوگ کالا</a>
+    </nav>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="dirty-badge" style="display:none;background:#c0392b;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px"></span>
+      <button class="btn btn-ghost btn-sm" id="btn-save-html" style="background:#fff;color:#1f3a5f">💾 ذخیره در فایل</button>
+    </div>
+  </div>
+</header>
+<main class="container" id="app"></main>
+<script>
+/* ================= Jalali calendar ================= */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.Jalali = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  var breaks = [-61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178];
+  function div(a, b) { return ~~(a / b); }
+  function mod(a, b) { return a - ~~(a / b) * b; }
+  function jalCal(jy, withoutLeap) {
+    var bl = breaks.length, gy = jy + 621, leapJ = -14, jp = breaks[0], jm, jump, leap, leapG, march, n, i;
+    if (jy < jp || jy >= breaks[bl - 1]) throw new Error('Invalid Jalaali year ' + jy);
+    for (i = 1; i < bl; i += 1) {
+      jm = breaks[i]; jump = jm - jp;
+      if (jy < jm) break;
+      leapJ = leapJ + div(jump, 33) * 8 + div(mod(jump, 33), 4);
+      jp = jm;
+    }
+    n = jy - jp;
+    leapJ = leapJ + div(n, 33) * 8 + div(mod(n, 33) + 3, 4);
+    if (mod(jump, 33) === 4 && jump - n === 4) leapJ += 1;
+    leapG = div(gy, 4) - div((div(gy, 100) + 1) * 3, 4) - 150;
+    march = 20 + leapJ - leapG;
+    if (!withoutLeap) {
+      if (jump - n < 6) n = n - jump + div(jump + 4, 33) * 33;
+      leap = mod(mod(n + 1, 33) - 1, 4);
+      if (leap === -1) leap = 4;
+    }
+    return { leap: leap, gy: gy, march: march };
+  }
+  function g2d(gy, gm, gd) {
+    var d = div((gy + div(gm - 8, 6) + 100100) * 1461, 4) + div(153 * mod(gm + 9, 12) + 2, 5) + gd - 34840408;
+    d = d - div(div(gy + 100100 + div(gm - 8, 6), 100) * 3, 4) + 752;
+    return d;
+  }
+  function d2g(jdn) {
+    var j, i, gd, gm, gy;
+    j = 4 * jdn + 139361631;
+    j = j + div(div(4 * jdn + 183187720, 146097) * 3, 4) * 4 - 3908;
+    i = div(mod(j, 1461), 4) * 5 + 308;
+    gd = div(mod(i, 153), 5) + 1;
+    gm = mod(div(i, 153), 12) + 1;
+    gy = div(j, 1461) - 100100 + div(8 - gm, 6);
+    return { gy: gy, gm: gm, gd: gd };
+  }
+  function j2d(jy, jm, jd) {
+    var r = jalCal(jy, true);
+    return g2d(r.gy, 3, r.march) + (jm - 1) * 31 - div(jm, 7) * (jm - 7) + jd - 1;
+  }
+  function d2j(jdn) {
+    var gy = d2g(jdn).gy, jy = gy - 621, r = jalCal(jy, false), jdn1f = g2d(gy, 3, r.march), jd, jm, k;
+    k = jdn - jdn1f;
+    if (k >= 0) {
+      if (k <= 185) { jm = 1 + div(k, 31); jd = mod(k, 31) + 1; return { jy: jy, jm: jm, jd: jd }; }
+      k -= 186;
+    } else {
+      jy -= 1; k += 179;
+      if (r.leap === 1) k += 1;
+    }
+    jm = 7 + div(k, 30);
+    jd = mod(k, 30) + 1;
+    return { jy: jy, jm: jm, jd: jd };
+  }
+  function isLeapJalaaliYear(jy) { return jalCal(jy, false).leap === 0; }
+  function jalaaliMonthLength(jy, jm) {
+    if (jm <= 6) return 31;
+    if (jm <= 11) return 30;
+    return isLeapJalaaliYear(jy) ? 30 : 29;
+  }
+  function isValidJalaaliDate(jy, jm, jd) {
+    return jy >= -61 && jy <= 3177 && jm >= 1 && jm <= 12 && jd >= 1 && jd <= jalaaliMonthLength(jy, jm);
+  }
+  function toJalaali(gy, gm, gd) { return d2j(g2d(gy, gm, gd)); }
+  function toGregorian(jy, jm, jd) { return d2g(j2d(jy, jm, jd)); }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function today() {
+    var now = new Date();
+    var j = toJalaali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    return { jy: j.jy, jm: j.jm, jd: j.jd };
+  }
+  function format(j) { return j.jy + '/' + pad2(j.jm) + '/' + pad2(j.jd); }
+  function parse(str) {
+    if (str == null) return null;
+    var s = String(str).replace(/[۰-۹]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x06f0 + 48); })
+      .replace(/[٠-٩]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x0660 + 48); })
+      .replace(/[-.]/g, '/').trim();
+    var m = s.match(/^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/);
+    if (!m) return null;
+    var jy = +m[1], jm = +m[2], jd = +m[3];
+    if (!isValidJalaaliDate(jy, jm, jd)) return null;
+    return { jy: jy, jm: jm, jd: jd };
+  }
+  var MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+  var WEEKDAYS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+  return {
+    toJalaali: toJalaali, toGregorian: toGregorian, isValidJalaaliDate: isValidJalaaliDate,
+    jalaaliMonthLength: jalaaliMonthLength, today: today, format: format, pad2: pad2, parse: parse,
+    MONTHS: MONTHS, WEEKDAYS: WEEKDAYS
+  };
+});
+
+/* ================= helpers ================= */
+var J = window.Jalali;
+var PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+
+function esc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function faDigits(value) { return String(value).replace(/[0-9]/g, function (d) { return PERSIAN_DIGITS[+d]; }); }
+function toLatinDigits(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/[۰-۹]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x06f0 + 48); })
+    .replace(/[٠-٩]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x0660 + 48); });
+}
+function fmtNum(value, decimals) {
+  decimals = decimals === undefined ? 2 : decimals;
+  if (value === null || value === undefined || value === '') return '—';
+  var n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  var fixed = n.toFixed(decimals);
+  var parts = fixed.split('.');
+  var out = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '٬');
+  if (parts[1]) out += '٫' + parts[1];
+  return faDigits(out);
+}
+function fmtInt(value) {
+  if (value === null || value === undefined || value === '') return '—';
+  return faDigits(String(Math.round(Number(value))).replace(/\B(?=(\d{3})+(?!\d))/g, '٬'));
+}
+function parseNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  var s = toLatinDigits(value).replace(/[,٬\s]/g, '').trim();
+  if (s === '') return null;
+  var n = Number(s);
+  return Number.isFinite(n) ? n : NaN;
+}
+function monthLabel(ym) {
+  if (!ym || !/^\d{4}\/\d{2}$/.test(ym)) return '';
+  var parts = ym.split('/');
+  return J.MONTHS[+parts[1] - 1] + ' ' + faDigits(parts[0]);
+}
+function nowLabel() {
+  var t = new Date();
+  var j = J.toJalaali(t.getFullYear(), t.getMonth() + 1, t.getDate());
+  return faDigits(j.jy) + '/' + faDigits(J.pad2(j.jm)) + '/' + faDigits(J.pad2(j.jd)) + ' ' +
+    faDigits(J.pad2(t.getHours())) + ':' + faDigits(J.pad2(t.getMinutes()));
+}
+
+/* ================= ZIP (read + stored write) ================= */
+var CRC_TABLE = (function () {
+  var table = new Int32Array(256);
+  for (var i = 0; i < 256; i += 1) {
+    var c = i;
+    for (var k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    table[i] = c;
+  }
+  return table;
+})();
+
+function crc32(u8) {
+  var c = -1;
+  for (var i = 0; i < u8.length; i += 1) c = CRC_TABLE[(c ^ u8[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ -1) >>> 0;
+}
+
+function concatArrays(list) {
+  var total = 0, i;
+  for (i = 0; i < list.length; i += 1) total += list[i].length;
+  var out = new Uint8Array(total);
+  var off = 0;
+  for (i = 0; i < list.length; i += 1) { out.set(list[i], off); off += list[i].length; }
+  return out;
+}
+
+function inflateRaw(bytes) {
+  if (typeof DecompressionStream === 'undefined') {
+    return Promise.reject(new Error('مرورگر شما از خواندن فایل‌های فشرده xlsx پشتیبانی نمی‌کند. لطفاً Chrome یا Edge به‌روز استفاده کنید.'));
+  }
+  var ds = new DecompressionStream('deflate-raw');
+  return new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer()
+    .then(function (buf) { return new Uint8Array(buf); });
+}
+
+function readZip(buffer) {
+  var u8 = new Uint8Array(buffer);
+  var dv = new DataView(buffer);
+  var eocd = -1;
+  var minOffset = Math.max(0, u8.length - 65557);
+  for (var i = u8.length - 22; i >= minOffset; i -= 1) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) return Promise.reject(new Error('فایل xlsx معتبر نیست (ساختار ZIP یافت نشد).'));
+  var count = dv.getUint16(eocd + 10, true);
+  var offset = dv.getUint32(eocd + 16, true);
+  var entries = new Map();
+  var decoder = new TextDecoder();
+  var chain = Promise.resolve();
+
+  for (var n = 0; n < count; n += 1) {
+    if (dv.getUint32(offset, true) !== 0x02014b50) return Promise.reject(new Error('ساختار فایل xlsx خراب است.'));
+    var method = dv.getUint16(offset + 10, true);
+    var compSize = dv.getUint32(offset + 20, true);
+    var nameLen = dv.getUint16(offset + 28, true);
+    var extraLen = dv.getUint16(offset + 30, true);
+    var commentLen = dv.getUint16(offset + 32, true);
+    var localOffset = dv.getUint32(offset + 42, true);
+    var name = decoder.decode(u8.subarray(offset + 46, offset + 46 + nameLen)).replace(/\\/g, '/');
+    var localNameLen = dv.getUint16(localOffset + 26, true);
+    var localExtraLen = dv.getUint16(localOffset + 28, true);
+    var start = localOffset + 30 + localNameLen + localExtraLen;
+    var raw = u8.slice(start, start + compSize);
+    offset += 46 + nameLen + extraLen + commentLen;
+    (function (entryName, entryMethod, entryRaw) {
+      chain = chain.then(function () {
+        if (entryMethod === 0) return entryRaw;
+        if (entryMethod === 8) return inflateRaw(entryRaw);
+        throw new Error('روش فشرده‌سازی پشتیبانی نمی‌شود: ' + entryMethod);
+      }).then(function (data) { entries.set(entryName, data); });
+    })(name, method, raw);
+  }
+  return chain.then(function () { return entries; });
+}
+
+function writeZip(files) {
+  var enc = new TextEncoder();
+  var parts = [];
+  var centrals = [];
+  var offset = 0;
+  for (var i = 0; i < files.length; i += 1) {
+    var f = files[i];
+    var name = enc.encode(f.name);
+    var data = typeof f.data === 'string' ? enc.encode(f.data) : f.data;
+    var crc = crc32(data);
+
+    var local = new Uint8Array(30 + name.length);
+    var lv = new DataView(local.buffer);
+    lv.setUint32(0, 0x04034b50, true);
+    lv.setUint16(4, 20, true);
+    lv.setUint16(6, 0x0800, true);
+    lv.setUint16(8, 0, true);
+    lv.setUint16(10, 0, true);
+    lv.setUint16(12, 0x21, true);
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, data.length, true);
+    lv.setUint32(22, data.length, true);
+    lv.setUint16(26, name.length, true);
+    lv.setUint16(28, 0, true);
+    local.set(name, 30);
+    parts.push(local, data);
+
+    var central = new Uint8Array(46 + name.length);
+    var cv = new DataView(central.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true);
+    cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(10, 0, true);
+    cv.setUint16(12, 0, true);
+    cv.setUint16(14, 0x21, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, data.length, true);
+    cv.setUint32(24, data.length, true);
+    cv.setUint16(28, name.length, true);
+    cv.setUint16(30, 0, true);
+    cv.setUint16(32, 0, true);
+    cv.setUint16(34, 0, true);
+    cv.setUint16(36, 0, true);
+    cv.setUint32(38, 0, true);
+    cv.setUint32(42, offset, true);
+    central.set(name, 46);
+    centrals.push(central);
+
+    offset += local.length + data.length;
+  }
+  var centralAll = concatArrays(centrals);
+  var eocd = new Uint8Array(22);
+  var ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, centralAll.length, true);
+  ev.setUint32(16, offset, true);
+  return concatArrays(parts.concat([centralAll, eocd]));
+}
+
+/* ================= XLSX read/write ================= */
+var DATE_FMT_IDS = { 14: 1, 15: 1, 16: 1, 17: 1, 18: 1, 19: 1, 20: 1, 21: 1, 22: 1, 27: 1, 28: 1, 29: 1, 30: 1, 31: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1, 45: 1, 46: 1, 47: 1, 50: 1, 51: 1, 52: 1, 53: 1, 54: 1, 55: 1, 56: 1, 57: 1, 58: 1 };
+
+function decodeXml(text) {
+  return String(text).replace(/&(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);/g, function (m, ent) {
+    switch (ent) {
+      case 'amp': return '&';
+      case 'lt': return '<';
+      case 'gt': return '>';
+      case 'quot': return '"';
+      case 'apos': return "'";
+      default:
+        if (ent.charAt(1) === 'x') return String.fromCodePoint(parseInt(ent.slice(2), 16));
+        return String.fromCodePoint(parseInt(ent.slice(1), 10));
+    }
+  });
+}
+function escapeXml(text) {
+  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function parseAttrs(text) {
+  var out = {};
+  String(text).replace(/([\w:]+)\s*=\s*"([^"]*)"/g, function (m, key, value) {
+    out[key] = decodeXml(value);
+    return m;
+  });
+  return out;
+}
+function colToIndex(letters) {
+  var n = 0;
+  for (var i = 0; i < letters.length; i += 1) n = n * 26 + (letters.charCodeAt(i) - 64);
+  return n - 1;
+}
+function indexToCol(index) {
+  var n = index + 1, s = '';
+  while (n > 0) {
+    var r = (n - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+function isDateFormatCode(code) {
+  var cleaned = String(code || '').replace(/"[^"]*"/g, '').replace(/\\./g, '').replace(/\[[^\]]*\]/g, '');
+  return /[yYmMdDhHsS]/.test(cleaned);
+}
+function serialToDate(serial) {
+  var days = Math.floor(Number(serial));
+  return new Date(Date.UTC(1899, 11, 30) + days * 86400000);
+}
+function resolvePath(target) {
+  var t = String(target).replace(/\\/g, '/');
+  if (t.charAt(0) === '/') return t.slice(1);
+  if (t.indexOf('xl/') === 0) return t;
+  return 'xl/' + t.replace(/^\.\//, '');
+}
+function stripNamespaces(xml) {
+  return String(xml).replace(/<(\/?)[A-Za-z_][\w.-]*:/g, '<$1');
+}
+
+function readXlsx(buffer) {
+  return readZip(buffer).then(function (files) {
+    var text = function (name) {
+      var b = files.get(name);
+      return b ? stripNamespaces(new TextDecoder().decode(b)) : '';
+    };
+
+    var sharedStrings = [];
+    var sstXml = text('xl/sharedStrings.xml');
+    if (sstXml) {
+      var siRe = /<si\b[^>]*>([\s\S]*?)<\/si>/g, m;
+      while ((m = siRe.exec(sstXml)) !== null) {
+        var value = '';
+        var tRe = /<t\b[^>]*>([\s\S]*?)<\/t>/g, t;
+        while ((t = tRe.exec(m[1])) !== null) value += decodeXml(t[1]);
+        sharedStrings.push(value);
+      }
+    }
+
+    var styleDate = [];
+    var stylesXml = text('xl/styles.xml');
+    if (stylesXml) {
+      var custom = new Map();
+      var numFmtRe = /<numFmt\b([^>]*)\/>/g, nm;
+      while ((nm = numFmtRe.exec(stylesXml)) !== null) {
+        var a = parseAttrs(nm[1]);
+        custom.set(Number(a.numFmtId), a.formatCode || '');
+      }
+      var cellXfs = stylesXml.match(/<cellXfs\b[^>]*>([\s\S]*?)<\/cellXfs>/);
+      if (cellXfs) {
+        var xfRe = /<xf\b([^>]*?)(?:\/>|>[\s\S]*?<\/xf>)/g, xf;
+        while ((xf = xfRe.exec(cellXfs[1])) !== null) {
+          var xa = parseAttrs(xf[1]);
+          var id = Number(xa.numFmtId || 0);
+          styleDate.push(!!(DATE_FMT_IDS[id] || isDateFormatCode(custom.get(id))));
+        }
+      }
+    }
+
+    var workbookXml = text('xl/workbook.xml');
+    var relsXml = text('xl/_rels/workbook.xml.rels');
+    var relMap = new Map();
+    var relRe = /<Relationship\b([^>]*)\/>/g, rm;
+    while ((rm = relRe.exec(relsXml)) !== null) {
+      var ra = parseAttrs(rm[1]);
+      if (ra.Id && ra.Target) relMap.set(ra.Id, resolvePath(ra.Target));
+    }
+
+    var sheets = [];
+    var sheetRe = /<sheet\b([^>]*)\/>/g, sm;
+    while ((sm = sheetRe.exec(workbookXml)) !== null) {
+      var sa = parseAttrs(sm[1]);
+      var path = relMap.get(sa['r:id']);
+      if (!path) continue;
+      sheets.push({ name: sa.name || 'Sheet', path: path });
+    }
+
+    return sheets.map(function (sheet) {
+      var xml = text(sheet.path);
+      var rows = [];
+      var maxCol = 0;
+      var maxRow = 0;
+      var rowRe = /<row\b([^>]*?)(?:\/>|>([\s\S]*?)<\/row>)/g, rowMatch;
+      while ((rowMatch = rowRe.exec(xml)) !== null) {
+        var rowAttrs = parseAttrs(rowMatch[1]);
+        var rowIndex = Number(rowAttrs.r || maxRow + 1) - 1;
+        var inner = rowMatch[2] || '';
+        var cells = [];
+        var cellRe = /<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g, cellMatch;
+        while ((cellMatch = cellRe.exec(inner)) !== null) {
+          var attrs = parseAttrs(cellMatch[1]);
+          var ref = attrs.r || '';
+          var letters = (ref.match(/^[A-Z]+/) || [''])[0];
+          var colIndex = letters ? colToIndex(letters) : cells.length;
+          var body = cellMatch[2] || '';
+          var type = attrs.t || 'n';
+          var cellValue = null;
+          if (type === 'inlineStr') {
+            var itRe = /<t\b[^>]*>([\s\S]*?)<\/t>/g, it, joined = '';
+            while ((it = itRe.exec(body)) !== null) joined += decodeXml(it[1]);
+            cellValue = joined;
+          } else {
+            var vMatch = body.match(/<v\b[^>]*>([\s\S]*?)<\/v>/);
+            var raw = vMatch ? decodeXml(vMatch[1]) : null;
+            if (raw == null) cellValue = null;
+            else if (type === 's') cellValue = sharedStrings[Number(raw)] != null ? sharedStrings[Number(raw)] : '';
+            else if (type === 'str') cellValue = raw;
+            else if (type === 'b') cellValue = raw === '1';
+            else if (type === 'd') cellValue = new Date(raw);
+            else if (type === 'e') cellValue = null;
+            else {
+              var num = Number(raw);
+              var styleIdx = attrs.s != null ? Number(attrs.s) : 0;
+              if (Number.isFinite(num) && styleDate[styleIdx]) cellValue = serialToDate(num);
+              else cellValue = Number.isFinite(num) ? num : raw;
+            }
+          }
+          cells[colIndex] = cellValue;
+          if (colIndex > maxCol) maxCol = colIndex;
+        }
+        var padded = [];
+        for (var c = 0; c <= Math.max(maxCol, cells.length - 1); c += 1) padded[c] = cells[c] === undefined ? null : cells[c];
+        rows[rowIndex] = padded;
+        if (rowIndex > maxRow) maxRow = rowIndex;
+      }
+      var out = [];
+      for (var r = 0; r <= maxRow; r += 1) {
+        var row = rows[r] || [];
+        var normRow = [];
+        for (var cc = 0; cc <= maxCol; cc += 1) normRow[cc] = row[cc] === undefined ? null : row[cc];
+        out.push(normRow);
+      }
+      return { name: sheet.name, rows: out };
+    });
+  }).then(function (sheets) { return { sheets: sheets }; });
+}
+
+var STYLES_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">\n' +
+'<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0.00"/><numFmt numFmtId="165" formatCode="0.0&quot;%&quot;"/></numFmts>\n' +
+'<fonts count="5">\n' +
+'<font><sz val="10"/><name val="Tahoma"/></font>\n' +
+'<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Tahoma"/></font>\n' +
+'<font><b/><sz val="10"/><name val="Tahoma"/></font>\n' +
+'<font><b/><sz val="14"/><color rgb="FF1F3A5F"/><name val="Tahoma"/></font>\n' +
+'<font><sz val="10"/><color rgb="FF555555"/><name val="Tahoma"/></font>\n' +
+'</fonts>\n' +
+'<fills count="5">\n' +
+'<fill><patternFill patternType="none"/></fill>\n' +
+'<fill><patternFill patternType="gray125"/></fill>\n' +
+'<fill><patternFill patternType="solid"><fgColor rgb="FF1F3A5F"/><bgColor indexed="64"/></patternFill></fill>\n' +
+'<fill><patternFill patternType="solid"><fgColor rgb="FFF3F6FA"/><bgColor indexed="64"/></patternFill></fill>\n' +
+'<fill><patternFill patternType="solid"><fgColor rgb="FFE3EAF3"/><bgColor indexed="64"/></patternFill></fill>\n' +
+'</fills>\n' +
+'<borders count="2">\n' +
+'<border><left/><right/><top/><bottom/><diagonal/></border>\n' +
+'<border><left style="thin"><color rgb="FFB9C8DB"/></left><right style="thin"><color rgb="FFB9C8DB"/></right><top style="thin"><color rgb="FFB9C8DB"/></top><bottom style="thin"><color rgb="FFB9C8DB"/></bottom><diagonal/></border>\n' +
+'</borders>\n' +
+'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>\n' +
+'<cellXfs count="12">\n' +
+'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>\n' +
+'<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>\n' +
+'<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>\n' +
+'<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'<xf numFmtId="0" fontId="2" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'<xf numFmtId="164" fontId="2" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'<xf numFmtId="0" fontId="2" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>\n' +
+'<xf numFmtId="165" fontId="2" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n' +
+'</cellXfs>\n' +
+'<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>\n' +
+'</styleSheet>';
+
+function cellXml(ref, cell) {
+  if (!cell || cell.v === null || cell.v === undefined || cell.v === '') {
+    if (cell && cell.s) return '<c r="' + ref + '" s="' + cell.s + '"/>';
+    return '';
+  }
+  var s = cell.s ? ' s="' + cell.s + '"' : '';
+  if (cell.t === 'str') {
+    return '<c r="' + ref + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + escapeXml(cell.v) + '</t></is></c>';
+  }
+  var num = Number(cell.v);
+  return '<c r="' + ref + '"' + s + '><v>' + (Number.isFinite(num) ? num : 0) + '</v></c>';
+}
+
+function writeXlsx(spec) {
+  var rowsXml = [];
+  spec.rows.forEach(function (row, r) {
+    var rowNum = r + 1;
+    var cells = (row.cells || []).map(function (cell, c) { return cellXml(indexToCol(c) + rowNum, cell); }).join('');
+    var h = row.h ? ' ht="' + row.h + '" customHeight="1"' : '';
+    if (!cells) return;
+    rowsXml.push('<row r="' + rowNum + '"' + h + '>' + cells + '</row>');
+  });
+
+  var lastCol = indexToCol(Math.max(0, (spec.cols || []).length - 1));
+  var dim = 'A1:' + lastCol + spec.rows.length;
+
+  var colsXml = (spec.cols || []).map(function (width, i) {
+    return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + width + '" customWidth="1"/>';
+  }).join('');
+
+  var paneRows = spec.freezeRows || 0;
+  var sheetViews = '<sheetViews><sheetView rightToLeft="1" tabSelected="1" workbookViewId="0">' +
+    (paneRows ? '<pane ySplit="' + paneRows + '" topLeftCell="A' + (paneRows + 1) + '" activePane="bottomLeft" state="frozen"/>' : '') +
+    '</sheetView></sheetViews>';
+
+  var mergeXml = spec.merges && spec.merges.length
+    ? '<mergeCells count="' + spec.merges.length + '">' + spec.merges.map(function (m) { return '<mergeCell ref="' + m + '"/>'; }).join('') + '</mergeCells>'
+    : '';
+  var filterXml = spec.autoFilter ? '<autoFilter ref="' + spec.autoFilter + '"/>' : '';
+
+  var sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">\n' +
+    '<dimension ref="' + dim + '"/>\n' +
+    sheetViews + '\n' +
+    '<sheetFormatPr defaultRowHeight="18"/>\n' +
+    '<cols>' + colsXml + '</cols>\n' +
+    '<sheetData>' + rowsXml.join('') + '</sheetData>\n' +
+    filterXml + '\n' +
+    mergeXml + '\n' +
+    '<pageMargins left="0.3" right="0.3" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>\n' +
+    '<pageSetup orientation="landscape" paperSize="9"/>\n' +
+    '</worksheet>';
+
+  var workbookXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">\n' +
+    '<sheets><sheet name="' + escapeXml(spec.sheetName || 'گزارش') + '" sheetId="1" r:id="rId1"/></sheets>\n' +
+    '</workbook>';
+
+  var workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>\n' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>\n' +
+    '</Relationships>';
+
+  var rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>\n' +
+    '</Relationships>';
+
+  var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">\n' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>\n' +
+    '<Default Extension="xml" ContentType="application/xml"/>\n' +
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>\n' +
+    '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>\n' +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>\n' +
+    '</Types>';
+
+  return writeZip([
+    { name: '[Content_Types].xml', data: contentTypes },
+    { name: '_rels/.rels', data: rootRels },
+    { name: 'xl/workbook.xml', data: workbookXml },
+    { name: 'xl/_rels/workbook.xml.rels', data: workbookRels },
+    { name: 'xl/styles.xml', data: STYLES_XML },
+    { name: 'xl/worksheets/sheet1.xml', data: sheetXml }
+  ]);
+}
+
+/* ================= import logic ================= */
+var HEADERS = {
+  permitDate: ['تاریخ مجوز ورود'],
+  docNo: ['شماره سند انبار'],
+  permitNo: ['شماره مجوز ورود'],
+  permitQty: ['مقدار کالا مجوز ورود'],
+  docDate: ['تاریخ سند انبار'],
+  itemCode: ['کد کالا'],
+  itemName: ['عنوان کالا'],
+  mainQty: ['مقدار به واحد اصلی سند انبار', 'مقدار به واحد اصلی'],
+  docQty: ['مقدار سند انبار'],
+  batch: ['توضیحات سربرگ مجوز ورود', 'توضیحات سربرگ'],
+  permitType: ['نوع مجوز مجوز ورود', 'نوع مجوز'],
+  lineNote: ['توضیحات قلم کالا مجوز ورود'],
+  group: ['گروه محصول']
+};
+var CATALOG_HEADERS = {
+  code: ['کد'],
+  family: ['عنوان'],
+  category: ['دسته بندی'],
+  name: ['نام محصول']
+};
+
+function norm(value) {
+  return String(value == null ? '' : value)
+    .replace(/\u200c/g, ' ')
+    .replace(/[يى]/g, 'ی')
+    .replace(/ك/g, 'ک')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+function text(value) {
+  if (value == null) return '';
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value).trim();
+}
+function parseJalali(value) {
+  if (value == null || value === '') return null;
+  if (value instanceof Date) {
+    var j = J.toJalaali(value.getUTCFullYear(), value.getUTCMonth() + 1, value.getUTCDate());
+    return J.format(j);
+  }
+  var parsed = J.parse(toLatinDigits(value).replace(/[-.]/g, '/').trim());
+  return parsed ? J.format(parsed) : null;
+}
+function headerMap(headerRow) {
+  var map = new Map();
+  (headerRow || []).forEach(function (value, index) {
+    var key = norm(value);
+    if (key && !map.has(key)) map.set(key, index);
+  });
+  return map;
+}
+function findColumn(map, aliases) {
+  for (var i = 0; i < aliases.length; i += 1) {
+    var key = norm(aliases[i]);
+    if (map.has(key)) return map.get(key);
+  }
+  return null;
+}
+function detectSheet(sheet, aliases) {
+  var map = headerMap(sheet.rows[0]);
+  var cols = {};
+  var found = 0;
+  Object.keys(aliases).forEach(function (field) {
+    var col = findColumn(map, aliases[field]);
+    cols[field] = col;
+    if (col !== null) found += 1;
+  });
+  return { sheet: sheet, cols: cols, found: found };
+}
+function isEmptyRow(row) {
+  return !row || row.every(function (v) { return v == null || String(v).trim() === ''; });
+}
+function extractCatalog(wb) {
+  for (var s = 0; s < wb.sheets.length; s += 1) {
+    var sheet = wb.sheets[s];
+    var det = detectSheet(sheet, CATALOG_HEADERS);
+    if (det.found === 4) {
+      var rows = [];
+      for (var r = 1; r < sheet.rows.length; r += 1) {
+        var row = sheet.rows[r];
+        if (isEmptyRow(row)) continue;
+        var cell = function (field) { return det.cols[field] != null ? row[det.cols[field]] : null; };
+        var code = toLatinDigits(text(cell('code'))).trim();
+        if (!code) continue;
+        rows.push({
+          c: code,
+          f: text(cell('family')) || 'نامشخص',
+          g: text(cell('category')) || 'نامشخص',
+          n: text(cell('name')) || code
+        });
+      }
+      return { sheet: sheet.name, rows: rows };
+    }
+  }
+  return null;
+}
+function extractReceipts(wb) {
+  for (var s = 0; s < wb.sheets.length; s += 1) {
+    var sheet = wb.sheets[s];
+    var det = detectSheet(sheet, HEADERS);
+    var required = ['permitDate', 'itemCode', 'itemName', 'mainQty'];
+    var ok = required.every(function (field) { return det.cols[field] != null; }) && det.found >= 8;
+    if (!ok) continue;
+
+    var records = [];
+    var errors = [];
+    for (var r = 1; r < sheet.rows.length; r += 1) {
+      var row = sheet.rows[r];
+      if (isEmptyRow(row)) continue;
+      var cell = function (field) { return det.cols[field] != null ? row[det.cols[field]] : null; };
+      if (!text(cell('permitDate')) && !text(cell('itemCode'))) continue;
+
+      var permitDate = parseJalali(cell('permitDate'));
+      var docDate = parseJalali(cell('docDate'));
+      var code = toLatinDigits(text(cell('itemCode'))).trim();
+      var name = text(cell('itemName'));
+      var mainQty = parseNumber(cell('mainQty'));
+      var excelRow = r + 1;
+
+      var problems = [];
+      if (!permitDate) problems.push('تاریخ مجوز ورود نامعتبر است');
+      if (!code) problems.push('کد کالا خالی است');
+      if (!name) problems.push('عنوان کالا خالی است');
+      if (mainQty == null || isNaN(mainQty)) problems.push('مقدار واحد اصلی نامعتبر است');
+
+      if (problems.length) {
+        errors.push({ row: excelRow, message: problems.join('، ') });
+        continue;
+      }
+
+      var permitQty = parseNumber(cell('permitQty'));
+      var docQty = parseNumber(cell('docQty'));
+      records.push({
+        row: excelRow,
+        permitDate: permitDate,
+        docDate: docDate,
+        docNo: text(cell('docNo')),
+        permitNo: text(cell('permitNo')),
+        permitQty: isNaN(permitQty) ? null : permitQty,
+        itemCode: code,
+        itemName: name,
+        mainQty: mainQty,
+        docQty: isNaN(docQty) ? null : docQty,
+        batch: text(cell('batch')),
+        permitType: text(cell('permitType')) || 'تولید'
+      });
+    }
+    return { sheet: sheet.name, records: records, errors: errors };
+  }
+  return null;
+}
+
+/* ================= state ================= */
+var LS_KEY = 'prr.v1';
+var SEED = null;
+
+var state = null;
+var saveError = false;
+var dirty = false;
+
+function emptyState() {
+  return { products: [], receipts: [], importRec: null };
+}
+
+function updateDirtyBadge() {
+  var badge = document.getElementById('dirty-badge');
+  if (!badge) return;
+  if (dirty) {
+    badge.textContent = '● تغییرات ذخیره‌نشده';
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function save() {
+  dirty = true;
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    saveError = false;
+  } catch (e) {
+    saveError = true;
+  }
+  updateDirtyBadge();
+}
+
+function saveToHtmlFile() {
+  var html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  var json = JSON.stringify(state).replace(/</g, '\\u003c');
+  var re = /(<script type="application\/json" id="embedded-data">)[\s\S]*?(<\/script>)/;
+  if (!re.test(html)) {
+    alert('بلوک داده جاسازی‌شده در فایل پیدا نشد. لطفاً فایل را دوباره از نسخه اصلی دریافت کنید.');
+    return false;
+  }
+  html = html.replace(re, '$1' + json + '$2');
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  var today = J.format(J.today()).replace(/\//g, '-');
+  a.download = 'receipt-report-' + today + '.html';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  return true;
+}
+
+function loadState() {
+  // ۱. اول از داده جاسازی‌شده در خود فایل
+  try {
+    var el = document.getElementById('embedded-data');
+    if (el) {
+      var parsed = JSON.parse(el.textContent);
+      if (parsed && Array.isArray(parsed.products) && Array.isArray(parsed.receipts)) {
+        if (parsed.products.length || parsed.receipts.length) return parsed;
+      }
+    }
+  } catch (e) { /* ignore */ }
+
+  // ۲. سپس localStorage (تغییرات ذخیره‌نشده)
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      var parsed2 = JSON.parse(raw);
+      if (parsed2 && Array.isArray(parsed2.products)) return parsed2;
+    }
+  } catch (e) { /* ignore */ }
+
+  // ۳. سپس SEED
+  if (SEED) {
+    var st = emptyState();
+    st.products = SEED.products.map(function (p) { return { c: p[0], f: p[1], g: p[2], n: p[3] }; });
+    st.receipts = SEED.receipts.map(function (r) {
+      return { pd: r[0], dn: r[1], pn: r[2], pq: r[3], dd: r[4], ic: r[5], nm: r[6], mq: r[7], dq: r[8], bt: r[9], pt: r[10], g: r[11] };
+    });
+    return st;
+  }
+  return emptyState();
+}
+
+function productMap() {
+  var map = new Map();
+  state.products.forEach(function (p) { map.set(p.c, p); });
+  return map;
+}
+
+function applyImport(wb, fileName) {
+  var catalog = extractCatalog(wb);
+  var receipts = extractReceipts(wb);
+
+  if (!receipts) {
+    return { ok: false, message: 'شیت رکوردها با سرستون‌های موردنیاز پیدا نشد. ستون‌های «کد کالا»، «عنوان کالا»، «مقدار به واحد اصلی» و «تاریخ مجوز ورود» لازم است.' };
+  }
+  if (!receipts.records.length && receipts.errors.length) {
+    return { ok: false, message: 'هیچ ردیف سالمی در فایل پیدا نشد.', errors: receipts.errors.slice(0, 50) };
+  }
+
+  var pmap = productMap();
+  if (catalog) catalog.rows.forEach(function (p) { pmap.set(p.c, p); });
+
+  var errors = receipts.errors.slice();
+  var unknownMap = new Map();
+  receipts.records.forEach(function (rec) {
+    if (!pmap.has(rec.itemCode)) {
+      if (!unknownMap.has(rec.itemCode)) unknownMap.set(rec.itemCode, { code: rec.itemCode, name: rec.itemName });
+      errors.push({ row: rec.row, message: 'کد کالا ' + rec.itemCode + ' در کاتالوگ محصول تعریف نشده است' });
+    }
+  });
+  if (errors.length) {
+    errors.sort(function (a, b) { return a.row - b.row; });
+    return {
+      ok: false,
+      message: 'ایمپورت انجام نشد: ' + errors.length + ' ردیف دارای خطا است. کدهای ناموجود در کاتالوگ را در همین صفحه تعریف کنید و دوباره فایل را ایمپورت کنید.',
+      errors: errors.slice(0, 100),
+      unknowns: Array.from(unknownMap.values())
+    };
+  }
+
+  var months = Array.from(new Set(receipts.records.map(function (r) { return r.permitDate.slice(0, 7); }))).sort();
+  var monthSet = new Set(months);
+  state.receipts = state.receipts.filter(function (r) { return !monthSet.has(r.pd.slice(0, 7)); });
+  receipts.records.forEach(function (rec) {
+    var p = pmap.get(rec.itemCode);
+    state.receipts.push({
+      pd: rec.permitDate, dn: rec.docNo, pn: rec.permitNo, pq: rec.permitQty, dd: rec.docDate,
+      ic: rec.itemCode, nm: rec.itemName, mq: rec.mainQty, dq: rec.docQty, bt: rec.batch, pt: rec.permitType,
+      g: p.g
+    });
+  });
+  if (catalog) {
+    var existing = productMap();
+    catalog.rows.forEach(function (p) {
+      var cur = existing.get(p.c);
+      if (cur) { cur.f = p.f; cur.g = p.g; cur.n = p.n; }
+      else state.products.push(p);
+    });
+  }
+  state.importRec = {
+    fileName: fileName,
+    months: months.join('، '),
+    receiptRows: receipts.records.length,
+    productRows: catalog ? catalog.rows.length : 0,
+    at: nowLabel()
+  };
+  save();
+  return { ok: true, months: months, receiptRows: receipts.records.length, productRows: catalog ? catalog.rows.length : 0 };
+}
+
+/* ================= report computation ================= */
+function groupSortKey(name) {
+  var s = toLatinDigits(name).replace(/٫/g, '.').replace(/\//g, '.');
+  var m = s.match(/\d+(?:\.\d+)?/);
+  return {
+    prefix: m ? s.slice(0, m.index).trim() : s.trim(),
+    size: m ? Number(m[0]) : Number.MAX_SAFE_INTEGER,
+    name: s
+  };
+}
+function compareGroups(a, b) {
+  var ka = groupSortKey(a), kb = groupSortKey(b);
+  var byPrefix = ka.prefix.localeCompare(kb.prefix, 'fa');
+  if (byPrefix) return byPrefix;
+  if (ka.size !== kb.size) return ka.size - kb.size;
+  return ka.name.localeCompare(kb.name, 'fa');
+}
+
+function distinctMonths() {
+  var set = new Set();
+  state.receipts.forEach(function (r) { set.add(r.pd.slice(0, 7)); });
+  return Array.from(set).sort().reverse();
+}
+function distinctGroups() {
+  var set = new Set();
+  state.receipts.forEach(function (r) { set.add(r.g); });
+  return Array.from(set).sort(compareGroups);
+}
+function latestMonth() {
+  var months = distinctMonths();
+  return months.length ? months[0] : '';
+}
+
+function readFilter(input) {
+  var warnings = [];
+  var month = input.month;
+  if (month === undefined || month === null || month === '') month = latestMonth();
+  if (month === 'all') month = '';
+  var pf = J.parse(toLatinDigits(input.from));
+  var pt = J.parse(toLatinDigits(input.to));
+  var from = pf ? J.format(pf) : '';
+  var to = pt ? J.format(pt) : '';
+  if (input.from && !from) warnings.push('تاریخ «از» نامعتبر بود و نادیده گرفته شد.');
+  if (input.to && !to) warnings.push('تاریخ «تا» نامعتبر بود و نادیده گرفته شد.');
+  if (from && to && from > to) { var t = from; from = to; to = t; warnings.push('تاریخ شروع و پایان جابه‌جا شده بود و اصلاح شد.'); }
+  var group = String(input.group || '').trim();
+  return { month: month, from: from, to: to, group: group, warnings: warnings };
+}
+
+function filterText(f) {
+  var parts = [];
+  parts.push(f.month ? 'ماه: ' + monthLabel(f.month) : 'ماه: همه');
+  if (f.from) parts.push('از تاریخ: ' + faDigits(f.from));
+  if (f.to) parts.push('تا تاریخ: ' + faDigits(f.to));
+  if (f.group) parts.push('گروه: ' + f.group);
+  parts.push('مبنای تاریخ: مجوز ورود');
+  return parts.join('  |  ');
+}
+
+function reportRows(f) {
+  var agg = new Map();
+  state.receipts.forEach(function (r) {
+    if (f.month && r.pd.slice(0, 7) !== f.month) return;
+    if (f.from && r.pd < f.from) return;
+    if (f.to && r.pd > f.to) return;
+    if (f.group && r.g !== f.group) return;
+    var key = r.pd.slice(0, 7) + '|' + r.g;
+    var cur = agg.get(key);
+    if (!cur) { cur = { month: r.pd.slice(0, 7), group: r.g, mainQty: 0 }; agg.set(key, cur); }
+    cur.mainQty += r.mq || 0;
+  });
+  var rows = Array.from(agg.values());
+  rows.sort(function (a, b) {
+    if (a.month !== b.month) return a.month < b.month ? -1 : 1;
+    return compareGroups(a.group, b.group);
+  });
+  return rows;
+}
+
+/* ================= UI ================= */
+var app = document.getElementById('app');
+var nav = document.getElementById('nav');
+var ui = {
+  page: 'report',
+  filter: { month: undefined, from: '', to: '', group: '' },
+  importResult: null,
+  importError: null,
+  importErrors: [],
+  catalogQ: '',
+  catalogPage: 1,
+  catalogMsg: null,
+  form: null
+};
+
+function banner(msg, type) {
+  return msg ? '<div class="banner ' + (type || 'ok') + '">' + esc(msg) + '</div>' : '';
+}
+function saveWarn() {
+  return saveError ? '<div class="banner warn">ذخیره‌سازی در حافظه مرورگر ممکن نشد؛ تغییرات تا بستن صفحه باقی می‌مانند.</div>' : '';
+}
+
+function monthOptions(selected) {
+  var opts = ['<option value="all"' + (!selected ? ' selected' : '') + '>همه ماه‌ها</option>'];
+  distinctMonths().forEach(function (ym) {
+    opts.push('<option value="' + esc(ym) + '"' + (selected === ym ? ' selected' : '') + '>' + esc(monthLabel(ym)) + '</option>');
+  });
+  return opts.join('');
+}
+function groupOptions(selected) {
+  var opts = ['<option value="">همه گروه‌ها</option>'];
+  distinctGroups().forEach(function (g) {
+    opts.push('<option value="' + esc(g) + '"' + (selected === g ? ' selected' : '') + '>' + esc(g) + '</option>');
+  });
+  return opts.join('');
+}
+
+function reportRowsHtml(rows, showMonth) {
+  if (!rows.length) return '<tr><td colspan="3" class="empty">در بازهٔ انتخابی ردیفی وجود ندارد.</td></tr>';
+  var out = '';
+  var n = 0;
+  var current = null;
+  rows.forEach(function (r) {
+    if (showMonth && r.month !== current) {
+      current = r.month;
+      n = 0;
+      out += '<tr class="month-row"><td colspan="3">' + esc(monthLabel(r.month)) + '</td></tr>';
+    }
+    n += 1;
+    out += '<tr><td class="muted">' + faDigits(n) + '</td>' +
+      '<td class="text">' + esc(r.group) + '</td>' +
+      '<td class="num-cell"><strong>' + fmtNum(r.mainQty, 2) + '</strong></td></tr>';
+  });
+  return out;
+}
+
+function renderReport() {
+  var f = readFilter(ui.filter);
+  var rows = reportRows(f);
+  var total = rows.reduce(function (acc, r) { return acc + (r.mainQty || 0); }, 0);
+  var showMonth = !f.month;
+  var filterLine = filterText(f);
+
+  app.innerHTML =
+    '<div class="page-head"><div>' +
+    '<h1>گزارش رسید ماهانه</h1>' +
+    '<p class="subtle">' + esc(filterLine) + '</p></div>' +
+    '<div class="actions">' +
+    '<button class="btn btn-ghost" id="btn-export">خروجی Excel</button>' +
+    '<button class="btn btn-primary" id="btn-print">چاپ / PDF</button>' +
+    '</div></div>' +
+    saveWarn() +
+    (f.warnings.length ? '<div class="banner warn">' + esc(f.warnings.join(' ')) + '</div>' : '') +
+    '<div class="card"><form class="filters" id="filter-form">' +
+    '<div class="field"><label for="f-month">ماه</label><select id="f-month" name="month">' + monthOptions(f.month) + '</select></div>' +
+    '<div class="field"><label for="f-from">از تاریخ (مجوز ورود)</label><input type="text" class="js-date" id="f-from" name="from" placeholder="۱۴۰۵/۰۵/۰۱" value="' + esc(f.from ? faDigits(f.from) : '') + '"></div>' +
+    '<div class="field"><label for="f-to">تا تاریخ (مجوز ورود)</label><input type="text" class="js-date" id="f-to" name="to" placeholder="۱۴۰۵/۰۵/۳۱" value="' + esc(f.to ? faDigits(f.to) : '') + '"></div>' +
+    '<div class="field wide"><label for="f-group">گروه محصول</label><select id="f-group" name="group">' + groupOptions(f.group) + '</select></div>' +
+    '<div class="actions"><button type="submit" class="btn btn-primary">اعمال فیلتر</button>' +
+    '<button type="button" class="btn btn-ghost" id="btn-clear">پاک‌کردن</button></div>' +
+    '</form></div>' +
+    '<div class="subtle small" style="margin-bottom:8px">' + faDigits(rows.length) + ' ردیف &nbsp;|&nbsp; ' + fmtNum(total, 2) + ' کیلوگرم</div>' +
+    '<div class="table-wrap"><table class="data report-table">' +
+    '<thead><tr><th style="width:60px">ردیف</th><th>گروه محصول</th><th style="width:220px">مقدار به واحد اصلی (کیلوگرم)</th></tr></thead>' +
+    '<tbody>' + reportRowsHtml(rows, showMonth) + '</tbody>' +
+    '<tfoot><tr><td></td><td class="text">جمع کل</td><td class="num-cell">' + fmtNum(total, 2) + '</td></tr></tfoot>' +
+    '</table></div>';
+
+  setupPickers();
+  document.getElementById('filter-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    ui.filter = {
+      month: document.getElementById('f-month').value,
+      from: document.getElementById('f-from').value,
+      to: document.getElementById('f-to').value,
+      group: document.getElementById('f-group').value
+    };
+    render();
+  });
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    ui.filter = { month: undefined, from: '', to: '', group: '' };
+    render();
+  });
+  document.getElementById('btn-export').addEventListener('click', function () { doExport(); });
+  document.getElementById('btn-print').addEventListener('click', function () { doPrint(); });
+}
+
+function renderImport() {
+  var resultHtml = ui.importResult
+    ? '<div class="card"><h2>ایمپورت با موفقیت انجام شد</h2>' +
+      '<ul class="rule-list">' +
+      '<li>ماه‌های جایگزین‌شده: <strong>' + esc(ui.importResult.months.join('، ')) + '</strong></li>' +
+      '<li>تعداد رسیدهای ذخیره‌شده: <strong>' + fmtInt(ui.importResult.receiptRows) + '</strong> ردیف</li>' +
+      '<li>تعداد کالاهای کاتالوگ به‌روزشده: <strong>' + fmtInt(ui.importResult.productRows) + '</strong> ردیف</li>' +
+      '</ul>' +
+      '<div class="actions" style="margin-top:12px">' +
+      '<button type="button" class="btn btn-primary" id="btn-view-report">مشاهده گزارش</button>' +
+      '</div></div>'
+    : '';
+  var errorsHtml = ui.importErrors && ui.importErrors.length
+    ? '<div class="card"><h2>ردیف‌های دارای خطا</h2><ul class="error-list">' +
+      ui.importErrors.map(function (e) { return '<li>ردیف <strong>' + faDigits(e.row) + '</strong>: ' + esc(e.message) + '</li>'; }).join('') +
+      '</ul></div>'
+    : '';
+  var unknownsHtml = ui.importUnknowns && ui.importUnknowns.length
+    ? '<div class="card"><h2>کالاهای ناموجود در کاتالوگ</h2>' +
+      '<p class="subtle">این کدها در فایل ایمپورت وجود دارند ولی در کاتالوگ تعریف نشده‌اند. برای هر کد، عنوان و دسته‌بندی (گروه محصول) را بنویسید و «افزودن» را بزنید؛ پس از افزودن همه، دوباره فایل را ایمپورت کنید.</p>' +
+      '<table class="lines-table"><thead><tr><th style="width:150px">کد کالا</th><th>نام محصول</th><th>عنوان</th><th>دسته‌بندی (گروه محصول)</th><th style="width:80px"></th></tr></thead><tbody>' +
+      ui.importUnknowns.map(function (u) {
+        return '<tr>' +
+          '<td class="num-cell ltr">' + faDigits(u.code) + '</td>' +
+          '<td><input type="text" data-f="n" value="' + esc(u.name) + '"></td>' +
+          '<td><input type="text" data-f="f" placeholder="مثلاً: طناب"></td>' +
+          '<td><input type="text" data-f="g" placeholder="مثلاً: طناب سالیک سایز 6"></td>' +
+          '<td><button type="button" class="btn btn-primary btn-sm" data-add-unknown="' + esc(u.code) + '">افزودن</button></td></tr>';
+      }).join('') +
+      '</tbody></table></div>'
+    : '';
+  var rec = state.importRec;
+  var lastHtml = rec
+    ? '<table class="data"><thead><tr><th>زمان</th><th>نام فایل</th><th>ماه‌ها</th><th>ردیف رسید</th><th>ردیف کاتالوگ</th></tr></thead><tbody><tr>' +
+      '<td class="num-cell ltr">' + esc(rec.at) + '</td>' +
+      '<td class="text">' + esc(rec.fileName) + '</td>' +
+      '<td>' + esc(faDigits(rec.months || '—')) + '</td>' +
+      '<td class="num-cell">' + fmtInt(rec.receiptRows) + '</td>' +
+      '<td class="num-cell">' + fmtInt(rec.productRows) + '</td>' +
+      '</tr></tbody></table>'
+    : '<p class="subtle">هنوز ایمپورتی ثبت نشده است.</p>';
+
+  app.innerHTML =
+    '<div class="page-head"><div><h1>ایمپورت اکسل</h1>' +
+    '<p class="subtle">فایل گزارش رسید محصول را بارگذاری کنید؛ کاتالوگ و رسیدها خودکار به‌روزرسانی می‌شوند.</p></div></div>' +
+    saveWarn() +
+    banner(ui.importError, 'err') + unknownsHtml + errorsHtml + resultHtml +
+    '<div class="card"><h2>بارگذاری فایل</h2>' +
+    '<form id="import-form"><div class="field" style="max-width:420px">' +
+    '<label for="import-file">فایل Excel (xlsx)</label>' +
+    '<input type="file" id="import-file" accept=".xlsx,.xlsm" required>' +
+    '</div>' +
+    '<div class="actions" style="margin-top:12px"><button type="submit" class="btn btn-primary" id="import-btn">ایمپورت</button></div>' +
+    '</form>' +
+    '<ul class="rule-list">' +
+    '<li>قالب فایل: شیت <strong>رکوردها</strong> با سرستون‌های «تاریخ مجوز ورود»، «کد کالا»، «عنوان کالا» و «مقدار به واحد اصلی سند انبار» و سایر ستون‌های گزارش.</li>' +
+    '<li>ستون‌ها بر اساس <strong>عنوان سرستون</strong> شناسایی می‌شوند؛ ترتیب ستون‌ها مهم نیست.</li>' +
+    '<li>ردیف‌های جمع انتهای فایل (بدون تاریخ و کد کالا) نادیده گرفته می‌شوند.</li>' +
+    '<li>اگر فایل شیت کاتالوگ (کد، عنوان، دسته بندی، نام محصول) داشته باشد، کاتالوگ هم به‌روزرسانی می‌شود.</li>' +
+    '<li>دادهٔ ماه‌های موجود در فایل <strong>کاملاً جایگزین</strong> می‌شود؛ ماه‌های دیگر دست‌نخورده می‌مانند.</li>' +
+    '<li>اگر کد کالایی در کاتالوگ نباشد، <strong>هیچ داده‌ای ذخیره نمی‌شود</strong> و فهرست خطاها نمایش داده می‌شود.</li>' +
+    '<li>گروه محصول از کد کالا (کاتالوگ) تعیین می‌شود.</li>' +
+    '</ul></div>' +
+    '<div class="card"><h2>آخرین ایمپورت</h2>' + lastHtml + '</div>';
+
+  app.querySelectorAll('[data-add-unknown]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.getAttribute('data-add-unknown');
+      var tr = btn.closest('tr');
+      var val = function (k) { return tr.querySelector('[data-f="' + k + '"]').value.trim(); };
+      var n = val('n'), fam = val('f'), cat = val('g');
+      var missing = [];
+      if (!fam) missing.push('عنوان');
+      if (!cat) missing.push('دسته‌بندی');
+      if (!n) missing.push('نام محصول');
+      if (missing.length) {
+        alert('وارد کردن ' + missing.join('، ') + ' برای کد ' + faDigits(code) + ' الزامی است.');
+        return;
+      }
+      state.products.push({ c: code, f: fam, g: cat, n: n });
+      save();
+      ui.importUnknowns = (ui.importUnknowns || []).filter(function (u) { return u.code !== code; });
+      render();
+    });
+  });
+  var viewBtn = document.getElementById('btn-view-report');
+  if (viewBtn) {
+    viewBtn.addEventListener('click', function () {
+      ui.page = 'report';
+      ui.filter = { month: (ui.importResult && ui.importResult.months && ui.importResult.months[0]) || 'all', from: '', to: '', group: '' };
+      render();
+    });
+  }
+  document.getElementById('import-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = document.getElementById('import-file');
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var btn = document.getElementById('import-btn');
+    btn.disabled = true;
+    btn.textContent = 'در حال پردازش…';
+    ui.importError = null;
+    ui.importErrors = [];
+    ui.importUnknowns = [];
+    ui.importResult = null;
+    file.arrayBuffer().then(function (buf) { return readXlsx(buf); }).then(function (wb) {
+      var result = applyImport(wb, file.name);
+      if (result.ok) ui.importResult = result;
+      else { ui.importError = result.message; ui.importErrors = result.errors || []; ui.importUnknowns = result.unknowns || []; }
+      render();
+    }).catch(function (err) {
+      ui.importError = err && err.message ? err.message : 'خواندن فایل با خطا روبه‌رو شد.';
+      ui.importErrors = [];
+      ui.importUnknowns = [];
+      render();
+    });
+  });
+}
+
+function renderCatalog() {
+  var q = ui.catalogQ.trim();
+  var size = 100;
+  var filtered = state.products.filter(function (p) {
+    if (!q) return true;
+    return (p.c + ' ' + p.n + ' ' + p.f + ' ' + p.g).indexOf(q) !== -1;
+  });
+  var pages = Math.max(1, Math.ceil(filtered.length / size));
+  var page = Math.min(Math.max(1, ui.catalogPage), pages);
+  ui.catalogPage = page;
+  var rows = filtered.slice((page - 1) * size, page * size);
+
+  var rowsHtml = rows.length ? rows.map(function (p) {
+    return '<tr>' +
+      '<td class="num-cell ltr">' + faDigits(p.c) + '</td>' +
+      '<td class="text">' + esc(p.f) + '</td>' +
+      '<td><span class="group-tag">' + esc(p.g) + '</span></td>' +
+      '<td class="text">' + esc(p.n) + '</td>' +
+      '<td class="no-print"><button class="btn btn-ghost btn-sm" data-copy="' + esc(p.c) + '">کپی</button> ' +
+      '<button class="btn btn-ghost btn-sm" data-edit="' + esc(p.c) + '">ویرایش</button></td></tr>';
+  }).join('') : '<tr><td colspan="5" class="empty">کالایی پیدا نشد.</td></tr>';
+
+  var pager = '';
+  if (pages > 1) {
+    var parts = [];
+    if (page > 1) parts.push('<a href="#" data-page-no="' + (page - 1) + '">قبلی</a>');
+    var start = Math.max(1, page - 3);
+    var end = Math.min(pages, start + 6);
+    start = Math.max(1, end - 6);
+    for (var pnum = start; pnum <= end; pnum += 1) {
+      parts.push(pnum === page
+        ? '<span class="current">' + faDigits(pnum) + '</span>'
+        : '<a href="#" data-page-no="' + pnum + '">' + faDigits(pnum) + '</a>');
+    }
+    if (page < pages) parts.push('<a href="#" data-page-no="' + (page + 1) + '">بعدی</a>');
+    parts.push('<span class="muted">از ' + faDigits(pages) + ' صفحه</span>');
+    pager = '<div class="pagination">' + parts.join('') + '</div>';
+  }
+
+  app.innerHTML =
+    '<div class="page-head"><div><h1>کاتالوگ کالا</h1>' +
+    '<p class="subtle">' + fmtInt(filtered.length) + ' کد کالا — مرجع تشخیص گروه محصول</p></div>' +
+    '<div class="actions"><button class="btn btn-primary" id="btn-add">افزودن دستی کالا</button></div></div>' +
+    saveWarn() +
+    (ui.catalogMsg ? banner(ui.catalogMsg.text, ui.catalogMsg.type) : '') +
+    '<div class="card"><h2>ایمپورت کاتالوگ از اکسل</h2>' +
+    '<form id="catalog-import-form"><div class="field" style="max-width:420px">' +
+    '<label for="catalog-file">فایل Excel (xlsx)</label>' +
+    '<input type="file" id="catalog-file" accept=".xlsx,.xlsm" required></div>' +
+    '<div class="actions" style="margin-top:12px"><button type="submit" class="btn btn-primary" id="catalog-import-btn">ایمپورت و جایگزینی کاتالوگ</button></div></form>' +
+    '<ul class="rule-list"><li>ستون‌های فایل: <strong>کد، عنوان، دسته بندی، نام محصول</strong> (ردیف اول سرستون).</li>' +
+    '<li>با هر ایمپورت، <strong>کل کاتالوگ قبلی پاک</strong> و با محتوای فایل جایگزین می‌شود.</li>' +
+    '<li>در کدهای تکراری، ردیف آخر ملاک است. گروه رسیدهای ثبت‌شده هم با کاتالوگ جدید هماهنگ می‌شود.</li>' +
+    '<li>برای افزودن یا ویرایش تکی، از «افزودن دستی کالا» و دکمه‌های ردیف‌ها استفاده کنید.</li></ul></div>' +
+    '<div class="card"><form class="filters" id="catalog-form">' +
+    '<div class="field wide"><label for="catalog-q">جستجو (کد، نام محصول، عنوان، دسته‌بندی)</label>' +
+    '<input type="text" id="catalog-q" value="' + esc(q) + '"></div>' +
+    '<div class="actions"><button type="submit" class="btn btn-primary">جستجو</button>' +
+    '<button type="button" class="btn btn-ghost" id="catalog-clear">پاک‌کردن</button></div>' +
+    '</form></div>' +
+    '<div class="table-wrap"><table class="data">' +
+    '<thead><tr><th style="width:150px">کد کالا</th><th style="width:200px">عنوان</th><th style="width:220px">دسته‌بندی (گروه محصول)</th><th>نام محصول</th><th style="width:90px" class="no-print">عملیات</th></tr></thead>' +
+    '<tbody>' + rowsHtml + '</tbody></table></div>' + pager;
+
+  document.getElementById('catalog-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    ui.catalogQ = document.getElementById('catalog-q').value;
+    ui.catalogPage = 1;
+    render();
+  });
+  document.getElementById('catalog-clear').addEventListener('click', function () {
+    ui.catalogQ = '';
+    ui.catalogPage = 1;
+    render();
+  });
+  document.getElementById('btn-add').addEventListener('click', function () {
+    ui.form = { mode: 'new', code: '', f: '', g: '', n: '' };
+    render();
+  });
+  document.getElementById('catalog-import-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var file = document.getElementById('catalog-file').files[0];
+    if (!file) return;
+    var btn = document.getElementById('catalog-import-btn');
+    btn.disabled = true;
+    btn.textContent = 'در حال پردازش…';
+    file.arrayBuffer().then(function (buf) { return readXlsx(buf); }).then(function (wb) {
+      var cat = extractCatalog(wb);
+      if (!cat || !cat.rows.length) throw new Error('شیتی با سرستون‌های «کد، عنوان، دسته بندی، نام محصول» یا ردیف معتبر پیدا نشد؛ کاتالوگ قبلی دست‌نخورده ماند.');
+      var map = new Map();
+      cat.rows.forEach(function (p) { map.set(p.c, p); });
+      var dups = cat.rows.length - map.size;
+      if (!confirm('کاتالوگ فعلی (' + state.products.length + ' کالا) کاملاً پاک و با ' + map.size + ' کالای فایل جایگزین می‌شود. ادامه می‌دهید؟')) { render(); return; }
+      state.products = Array.from(map.values());
+      var unmatched = 0;
+      state.receipts.forEach(function (r) {
+        var p = map.get(r.ic);
+        if (p) r.g = p.g; else unmatched += 1;
+      });
+      save();
+      ui.catalogQ = '';
+      ui.catalogPage = 1;
+      ui.catalogMsg = { type: 'ok', text: 'کاتالوگ جایگزین شد: ' + faDigits(map.size) + ' کالا' +
+        (dups ? ' (' + faDigits(dups) + ' ردیف تکراری حذف شد)' : '') +
+        (unmatched ? ' — ' + faDigits(unmatched) + ' ردیف رسید کدی خارج از کاتالوگ جدید دارد و گروه قبلی را نگه داشت.' : '') };
+      render();
+    }).catch(function (err) {
+      ui.catalogMsg = { type: 'err', text: err && err.message ? err.message : 'خواندن فایل با خطا روبه‌رو شد.' };
+      render();
+    });
+  });
+  app.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var p = productMap().get(btn.getAttribute('data-copy'));
+      if (!p) return;
+      ui.form = { mode: 'copy', code: '', f: p.f, g: p.g, n: p.n, sourceCode: p.c };
+      render();
+    });
+  });
+  app.querySelectorAll('[data-edit]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var p = productMap().get(btn.getAttribute('data-edit'));
+      if (!p) return;
+      ui.form = { mode: 'edit', code: p.c, f: p.f, g: p.g, n: p.n };
+      render();
+    });
+  });
+  app.querySelectorAll('[data-page-no]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      ui.catalogPage = Number(a.getAttribute('data-page-no'));
+      render();
+    });
+  });
+}
+
+function renderCatalogForm() {
+  var form = ui.form || { mode: 'new', code: '', f: '', g: '', n: '' };
+  var edit = form.mode === 'edit';
+  var copy = form.mode === 'copy';
+  var heading = edit ? 'ویرایش کالا' : copy ? 'افزودن کالا با کپی' : 'افزودن کالا';
+  var hint = edit
+    ? 'عنوان، دسته‌بندی و نام محصول قابل تغییر است؛ کد کالا ثابت است.'
+    : copy
+      ? 'فیلدها از کد ' + faDigits(form.sourceCode || '') + ' کپی شده‌اند؛ فقط کد کالای جدید را وارد کنید.'
+      : 'کد کالا باید یکتا باشد و پس از ذخیره قابل تغییر نیست.';
+
+  app.innerHTML =
+    '<div class="page-head"><div><h1>' + heading + '</h1><p class="subtle">' + esc(hint) + '</p></div>' +
+    '<div class="actions"><button class="btn btn-ghost" id="form-back">بازگشت به کاتالوگ</button></div></div>' +
+    banner(form.error, 'err') +
+    '<form id="catalog-form-page"><div class="card"><div class="grid-form">' +
+    '<div class="field"><label for="p-code">کد کالا *</label>' +
+    '<input type="text" id="p-code" value="' + esc(form.code || '') + '"' + (edit ? ' readonly' : '') + ' inputmode="numeric" required' + (copy ? ' autofocus' : '') + '></div>' +
+    '<div class="field"><label for="p-family">عنوان *</label>' +
+    '<input type="text" id="p-family" value="' + esc(form.f || '') + '" required></div>' +
+    '<div class="field"><label for="p-category">دسته‌بندی (گروه محصول) *</label>' +
+    '<input type="text" id="p-category" value="' + esc(form.g || '') + '" required></div>' +
+    '<div class="field" style="grid-column:1/-1"><label for="p-name">نام محصول *</label>' +
+    '<input type="text" id="p-name" value="' + esc(form.n || '') + '" required></div>' +
+    '</div>' +
+    '<div class="form-foot">' +
+    '<button type="submit" class="btn btn-primary">' + (edit ? 'ذخیره تغییرات' : 'افزودن کالا') + '</button>' +
+    '<button type="button" class="btn btn-ghost" id="form-cancel">انصراف</button>' +
+    '</div></div></form>';
+
+  document.getElementById('form-back').addEventListener('click', function () { ui.form = null; render(); });
+  document.getElementById('form-cancel').addEventListener('click', function () { ui.form = null; render(); });
+  document.getElementById('catalog-form-page').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var code = toLatinDigits(document.getElementById('p-code').value || '').trim();
+    var f = document.getElementById('p-family').value.trim();
+    var g = document.getElementById('p-category').value.trim();
+    var n = document.getElementById('p-name').value.trim();
+    var errors = [];
+    if (!edit && !/^\d{6,20}$/.test(code)) errors.push('کد کالا باید ۶ تا ۲۰ رقم باشد.');
+    if (!f) errors.push('عنوان الزامی است.');
+    if (!g) errors.push('دسته‌بندی الزامی است.');
+    if (!n) errors.push('نام محصول الزامی است.');
+    var pmap = productMap();
+    if (!edit && pmap.has(code)) errors.push('این کد کالا قبلاً ثبت شده است.');
+    if (errors.length) {
+      ui.form = { mode: form.mode, code: code, f: f, g: g, n: n, sourceCode: form.sourceCode, error: errors.join(' ') };
+      render();
+      return;
+    }
+    if (edit) {
+      var p = pmap.get(form.code);
+      if (p) {
+        p.f = f; p.g = g; p.n = n;
+        state.receipts.forEach(function (r) { if (r.ic === p.c) r.g = g; });
+      }
+    } else {
+      state.products.push({ c: code, f: f, g: g, n: n });
+    }
+    save();
+    ui.form = null;
+    ui.catalogQ = code;
+    ui.catalogPage = 1;
+    ui.page = 'catalog';
+    render();
+  });
+}
+
+/* ================= export & print ================= */
+function buildReportWorkbook(rows, total, fText, showMonth) {
+  var headerLabels = showMonth
+    ? ['ردیف', 'ماه', 'گروه محصول', 'مقدار به واحد اصلی (کیلوگرم)']
+    : ['ردیف', 'گروه محصول', 'مقدار به واحد اصلی (کیلوگرم)'];
+  var widths = showMonth ? [8, 14, 48, 28] : [8, 56, 28];
+  var lastCol = showMonth ? 'D' : 'C';
+
+  var outRows = [];
+  outRows.push({ h: 26, cells: [{ v: 'گزارش رسید ماهانه', s: 2, t: 'str' }] });
+  outRows.push({ h: 20, cells: [{ v: fText || '', s: 3, t: 'str' }] });
+  outRows.push({ cells: [] });
+  outRows.push({ h: 34, cells: headerLabels.map(function (label) { return { v: label, s: 1, t: 'str' }; }) });
+
+  rows.forEach(function (r, i) {
+    var cells = [{ v: i + 1, s: 4 }];
+    if (showMonth) cells.push({ v: r.month, s: 4, t: 'str' });
+    cells.push({ v: r.group, s: 5, t: 'str' });
+    cells.push({ v: r.mainQty || 0, s: 6 });
+    outRows.push({ h: 20, cells: cells });
+  });
+
+  var totalCells = [{ v: '', s: 8 }];
+  if (showMonth) totalCells.push({ v: '', s: 8 });
+  totalCells.push({ v: 'جمع کل', s: 10, t: 'str' });
+  totalCells.push({ v: total || 0, s: 9 });
+  outRows.push({ h: 22, cells: totalCells });
+
+  var lastRow = outRows.length;
+  return writeXlsx({
+    sheetName: 'گزارش',
+    cols: widths,
+    rows: outRows,
+    merges: ['A1:' + lastCol + '1', 'A2:' + lastCol + '2'],
+    autoFilter: 'A4:' + lastCol + (lastRow - 1),
+    freezeRows: 4
+  });
+}
+
+function doExport() {
+  var f = readFilter(ui.filter);
+  var rows = reportRows(f);
+  var total = rows.reduce(function (acc, r) { return acc + (r.mainQty || 0); }, 0);
+  var buffer = buildReportWorkbook(rows, total, filterText(f), !f.month);
+  var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'receipt-report-' + (f.month || 'all').replace('/', '-') + '.xlsx';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+function doPrint() {
+  var f = readFilter(ui.filter);
+  var rows = reportRows(f);
+  var total = rows.reduce(function (acc, r) { return acc + (r.mainQty || 0); }, 0);
+  var showMonth = !f.month;
+  var html = '<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>چاپ گزارش</title>' +
+    '<style>' + BASE_CSS + '</style></head><body>' +
+    '<main class="container">' +
+    '<div class="actions no-print" style="margin-bottom:14px">' +
+    '<button class="btn btn-primary" onclick="window.print()">چاپ / ذخیره PDF</button>' +
+    '<button class="btn btn-ghost" onclick="window.close()">بازگشت به گزارش</button>' +
+    '</div>' +
+    '<div class="print-head">' +
+    '<div class="print-title">گزارش رسید ماهانه</div>' +
+    '<div class="subtle">' + esc(filterText(f)) + '</div>' +
+    '</div>' +
+    '<table class="data report-table">' +
+    '<thead><tr><th style="width:50px">ردیف</th><th>گروه محصول</th>' +
+    '<th style="width:200px">مقدار به واحد اصلی (کیلوگرم)</th></tr></thead>' +
+    '<tbody>' + reportRowsHtml(rows, showMonth) + '</tbody>' +
+    '<tfoot><tr><td></td><td class="text">جمع کل</td><td>' + fmtNum(total, 2) + '</td></tr></tfoot>' +
+    '</table>' +
+    '</main>' +
+    '</body></html>';
+  var w = window.open('', '_blank');
+  if (!w) { alert('پنجره چاپ توسط مرورگر مسدود شد.'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
+/* ================= date picker ================= */
+function setupPickers() {
+  document.querySelectorAll('input.js-date').forEach(setupPicker);
+}
+function setupPicker(input) {
+  if (input.dataset.picker) return;
+  input.dataset.picker = '1';
+  var wrap = document.createElement('div');
+  wrap.className = 'dp-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+
+  var pop = document.createElement('div');
+  pop.className = 'dp-pop';
+  wrap.appendChild(pop);
+
+  var pst = { jy: 0, jm: 0 };
+  var initial = J.parse(input.value) || J.today();
+  pst.jy = initial.jy;
+  pst.jm = initial.jm;
+
+  function currentSelection() { return J.parse(input.value); }
+
+  function renderPop() {
+    var sel = currentSelection();
+    var today = J.today();
+    var first = J.toGregorian(pst.jy, pst.jm, 1);
+    var jsDay = new Date(first.gy, first.gm - 1, first.gd).getDay();
+    var offset = (jsDay + 1) % 7;
+    var len = J.jalaaliMonthLength(pst.jy, pst.jm);
+
+    var h = '<div class="dp-head">' +
+      '<button type="button" data-nav="-1" title="ماه قبل">‹</button>' +
+      '<span class="dp-title">' + J.MONTHS[pst.jm - 1] + ' ' + faDigits(pst.jy) + '</span>' +
+      '<button type="button" data-nav="1" title="ماه بعد">›</button>' +
+      '</div><div class="dp-grid">';
+    J.WEEKDAYS.forEach(function (w) { h += '<span class="wd">' + w + '</span>'; });
+    for (var i = 0; i < offset; i += 1) h += '<span class="blank"></span>';
+    for (var d = 1; d <= len; d += 1) {
+      var cls = '';
+      if (sel && sel.jy === pst.jy && sel.jm === pst.jm && sel.jd === d) cls = 'sel';
+      else if (today.jy === pst.jy && today.jm === pst.jm && today.jd === d) cls = 'today';
+      h += '<button type="button" class="' + cls + '" data-day="' + d + '">' + faDigits(d) + '</button>';
+    }
+    h += '</div>';
+    pop.innerHTML = h;
+
+    pop.querySelectorAll('[data-nav]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        pst.jm += Number(btn.getAttribute('data-nav'));
+        if (pst.jm < 1) { pst.jm = 12; pst.jy -= 1; }
+        if (pst.jm > 12) { pst.jm = 1; pst.jy += 1; }
+        renderPop();
+      });
+    });
+    pop.querySelectorAll('[data-day]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var d = btn.getAttribute('data-day');
+        input.value = faDigits(pst.jy) + '/' + faDigits(J.pad2(pst.jm)) + '/' + faDigits(J.pad2(d));
+        close();
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    });
+  }
+
+  function open() {
+    var parsed = J.parse(input.value) || J.today();
+    pst.jy = parsed.jy;
+    pst.jm = parsed.jm;
+    renderPop();
+    pop.classList.add('open');
+  }
+  function close() { pop.classList.remove('open'); }
+
+  input.addEventListener('focus', open);
+  input.addEventListener('click', open);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  document.addEventListener('click', function (e) {
+    if (!wrap.contains(e.target)) close();
+  });
+}
+
+/* ================= navigation & boot ================= */
+var BASE_CSS = document.querySelector('style').textContent;
+
+function render() {
+  document.querySelectorAll('#nav a').forEach(function (a) {
+    a.classList.toggle('active', a.getAttribute('data-page') === (ui.form ? 'catalog' : ui.page));
+  });
+  if (ui.form) renderCatalogForm();
+  else if (ui.page === 'report') renderReport();
+  else if (ui.page === 'import') renderImport();
+  else if (ui.page === 'catalog') renderCatalog();
+  window.scrollTo(0, 0);
+}
+
+nav.addEventListener('click', function (e) {
+  var a = e.target.closest('a[data-page]');
+  if (!a) return;
+  e.preventDefault();
+  ui.page = a.getAttribute('data-page');
+  ui.form = null;
+  render();
+});
+
+// دکمه ذخیره در فایل HTML
+document.getElementById('btn-save-html').addEventListener('click', function () {
+  if (!state) return;
+  save();
+  if (saveToHtmlFile()) {
+    dirty = false;
+    updateDirtyBadge();
+    alert('✅ فایل جدید دانلود شد.\n\nآن را جایگزین فایل قبلی در پوشه مشترک کنید تا سایر سیستم‌ها داده جدید را ببینند.');
+  }
+});
+
+// هشدار هنگام بستن صفحه با تغییرات ذخیره‌نشده
+window.addEventListener('beforeunload', function (e) {
+  if (dirty) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+state = loadState();
+render();
+</script>
+</body>
+</html>
